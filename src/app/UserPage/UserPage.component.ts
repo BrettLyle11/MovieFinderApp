@@ -6,6 +6,7 @@ import { debounceTime, distinctUntilChanged } from 'rxjs';
 import { MovieService } from '../services/movie.service';
 import { MovieFilters } from '../models/MovieFilters';
 import { Genre } from '../services/Genres.service';
+import { Movie } from '../models/Movie';
 
 @Component({
   selector: 'app-main-page',
@@ -15,7 +16,7 @@ import { Genre } from '../services/Genres.service';
 export class UserPageComponent implements OnInit {
   playlists: any[] = []; // Replace 'any' with your playlist model
   searchForm: FormGroup;
-  streamingPlatforms: string[] = ['Apple TV', 'Netflix', 'Brit Box', 'Disney+', 'Crave', 'Curiosity Stream', 'Hotstar','Mubi','Paramount+','Pulto TV', 'Prime Video', 'Tubi', 'Zee5'];
+  streamingPlatforms: string[] = ['Apple TV', 'Netflix', 'BritBox', 'Disney+', 'Crave', 'Curiosity Stream', 'Hotstar','Mubi','Paramount+','Pulto TV', 'Prime Video', 'Tubi', 'Zee5'];
   selectedPlatforms: string[] = [];
   public signedInUser: any = null;
 
@@ -35,6 +36,10 @@ export class UserPageComponent implements OnInit {
   selectedRatingCompany: string = '';
   ratingCompanies: Map<string, string> = new Map();
   ratingKeys: string[] = [];
+
+  showResulst = false;
+
+  movieList: Movie[] = [];
 
   constructor(private fb: FormBuilder,private movieService: MovieService, private router: Router, private service: MovieFinderUserService) {
     this.searchForm = this.fb.group({
@@ -198,11 +203,9 @@ export class UserPageComponent implements OnInit {
     if (event.target.checked) {
       this.selectedPlatforms.push(platform);
     } else {
-      const index = this.selectedPlatforms.indexOf(platform);
-      if (index > -1) {
-        this.selectedPlatforms.splice(index, 1);
-      }
+      this.selectedPlatforms = this.selectedPlatforms.filter((p) => p !== platform);
     }
+    console.log('Selected Platforms:', this.selectedPlatforms);
   }
 
   onSearch() {
@@ -222,9 +225,15 @@ export class UserPageComponent implements OnInit {
 
     console.log('New Movie:', newMovie);
     this.movieService.getMoviesOffSearch(newMovie).subscribe((response) => {
-      console.log('Search Response:', response);
+      console.log('Movie Search Response:', response);
+      this.movieList = response;
+      this.showResulst = true;
     });
 
     
+  }
+  handleCloseMovie(){
+    this.showResulst = false;
+    this.selectedPlatforms = [];
   }
 }

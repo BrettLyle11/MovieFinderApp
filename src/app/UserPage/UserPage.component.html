@@ -1,4 +1,8 @@
-<div class="main-container" style="display: flex;">
+
+
+
+
+<div *ngIf = "!showResulst" class="main-container" style="display: flex;">
     <!-- Navigation Bar -->
     <div style="width: 50%">
         <h1>Welcome, {{signedInUser.username}}</h1>
@@ -189,4 +193,9 @@
    
   
     
+  </div>
+
+  <div *ngIf="showResulst">
+<app-view-movie [movies] = "movieList" (closeMovieEvent)="handleCloseMovie()"></app-view-movie>
+
   </div>

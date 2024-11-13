@@ -11,6 +11,7 @@ import { SignupComponent } from './Sign-Up/signup.component';
 import { MovieFinderUserService } from './services/MovieFinderUser.service';
 import { LoginComponent } from './Login/login.component';
 import { UserPageComponent } from './UserPage/UserPage.component';
+import { ViewMovieComponent } from './View-Movie/ViewMovie.component';
 
 
 @NgModule({
@@ -19,7 +20,8 @@ import { UserPageComponent } from './UserPage/UserPage.component';
     MainComponent,
     SignupComponent,
     LoginComponent,
-    UserPageComponent
+    UserPageComponent,
+    ViewMovieComponent
   ],
   imports: [
     BrowserModule,
