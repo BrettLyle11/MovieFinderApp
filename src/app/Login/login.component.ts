@@ -45,13 +45,16 @@ export class LoginComponent {
             password: loginData.password ?? undefined,
             genre: undefined,
             email: undefined
-        }
+        };
 
         this.movieFinderUserService.LoginUser(newUser).subscribe((data) => {
         if(data.message === "success"){
-          this.movieFinderUserService.setUser(data.user)
+          this.movieFinderUserService.setUser(data.user);
             this.router.navigate(['/main']);
 
+        }
+        else{
+          alert("Invalid Username or Password");
         }
         });
       console.log('Login Data:', loginData);
