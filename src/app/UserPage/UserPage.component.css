@@ -1,0 +1,145 @@
+.main-container {
+    padding: 1em;
+    font-family: Arial, sans-serif;
+  }
+  
+  .navbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .playlists {
+    margin-top: 2em;
+  }
+  
+  .playlist-list {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  
+  .playlist-item {
+    border: 1px solid #ccc;
+    padding: 1em;
+    margin: 0.5em;
+    flex: 1 0 21%; /* Adjust the number of items per row */
+  }
+  
+  .search-filters {
+    margin-top: 2em;
+  }
+  
+  .form-group {
+    margin-bottom: 1em;
+  }
+  
+  .form-group label {
+    display: block;
+    font-weight: bold;
+  }
+  
+  .form-group input[type='text'],
+  .form-group input[type='number'] {
+    width: 100%;
+    padding: 0.5em;
+    box-sizing: border-box;
+  }
+  
+  .checkbox-group {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  
+  .checkbox-group div {
+    margin-right: 1em;
+  }
+  
+  button {
+    padding: 0.75em 1.5em;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    cursor: pointer;
+  }
+  
+  button:hover {
+    background-color: #0056b3;
+  }
+
+  .suggestions-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    border: 1px solid #ccc;
+    background-color: #fff;
+    max-height: 150px;
+    overflow-y: auto;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 10;
+  }
+  
+  .suggestions-dropdown ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .suggestions-dropdown li {
+    padding: 8px;
+    cursor: pointer;
+  }
+  
+  .suggestions-dropdown li:hover {
+    background-color: #f0f0f0;
+  }
+
+  .selected{
+    border: 4px solid #2a4f75;
+    border-radius: 10px;
+    background: #000000;
+  }
+
+  .selectedText{
+    color: #ffffff;
+  }
+
+
+  .selected-actors-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  
+  /* Style for each actor item (chip) */
+  .selected-actor {
+    display: flex;
+    align-items: center;
+    background-color: #e0e0e0;
+    padding: 4px 8px;
+    border-radius: 16px;
+    font-size: 14px;
+  }
+  
+  /* Style for the actor name text */
+  .selected-text {
+    margin-right: 8px;
+    color: #333;
+    font-weight: 500;
+  }
+  
+  /* Style for the clear button */
+  .clear-button {
+    background: none;
+    border: none;
+    color: #555;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0;
+    margin: 0;
+    line-height: 1;
+  }
+  
+  .clear-button:hover {
+    color: #d9534f;
+  }

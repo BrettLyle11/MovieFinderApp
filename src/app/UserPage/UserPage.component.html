@@ -1,0 +1,192 @@
+<div class="main-container" style="display: flex;">
+    <!-- Navigation Bar -->
+    <div style="width: 50%">
+        <h1>Welcome, {{signedInUser.username}}</h1>
+        <button (click)="goToWatchHistory()">Watch History</button>
+        <section class="playlists">
+            <h2>Your Playlists</h2>
+            <div class="playlist-list">
+              <!-- Iterate over playlists -->
+              <div class="playlist-item" *ngFor="let playlist of playlists">
+                <h3>{{ playlist.name }}</h3>
+                <!-- Display playlist details -->
+              </div>
+            </div>
+          </section>
+    </div>
+    <div style="width:50%">
+        <section class="search-filters">
+            <h2>Search Movies</h2>
+            <form [formGroup]="searchForm" (ngSubmit)="onSearch()">
+              <!-- Title -->
+              <div style="display: flex;">
+              <div class="form-group">
+                <label for="title">Title (Will look for matches)</label>
+                <input id="title" formControlName="title" type="text" />
+              </div>
+              </div>
+        
+              <!-- Actor Name -->
+               <div style="display:flex">
+              <div style="display: flex; position: relative;">
+                <div class="form-group">
+                  <label for="actor">Actor Name (Result must include)</label>
+                  <input
+                    id="actor"
+                    formControlName="actor"
+                    type="text"
+                    (focus)="showSuggestionsActors = true"
+                    (blur)="hideSuggestions()"
+                  />
+                  
+                  <!-- Suggestions dropdown -->
+                  <div
+                    *ngIf="showSuggestionsActors && suggestedActors.length > 0"
+                    class="suggestions-dropdown"
+                    (mousedown)="preventClose($event)"
+                  >
+                    <ul>
+                      <li *ngFor="let actor of suggestedActors" (click)="selectActor(actor)">
+                        {{ actor }}
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <div class="selected-actors-container">
+                <div *ngFor="let actor of selectedActor" class="selected-actor">
+                  <span class="selected-text">{{ actor }}</span>
+                  <button class="clear-button" (click)="clearActor(actor)">✕</button>
+                </div>
+              </div>
+            </div>
+            <div style="display: flex; margin-top: 20px;">
+              <!-- Director Name Section -->
+              <div style="display: flex; position: relative;">
+                <div class="form-group">
+                  <label for="director">Director Name (Result must include)</label>
+                  <input
+                    id="director"
+                    formControlName="director"
+                    type="text"
+                    (focus)="showSuggestionsDirectors = true"
+                    (blur)="hideSuggestionsDirectors()"
+                  />
+            
+                  <!-- Director Suggestions dropdown -->
+                  <div
+                    *ngIf="showSuggestionsDirectors && suggestedDirectors.length > 0"
+                    class="suggestions-dropdown"
+                    (mousedown)="preventClose($event)"
+                  >
+                    <ul>
+                      <li *ngFor="let director of suggestedDirectors" (click)="selectDirector(director)">
+                        {{ director }}
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            
+              <!-- Selected Directors -->
+              <div class="selected-actors-container">
+                <div *ngFor="let director of selectedDirectors" class="selected-actor">
+                  <span class="selected-text">{{ director }}</span>
+                  <button class="clear-button" (click)="clearDirector(director)">✕</button>
+                </div>
+              </div>
+            </div>
+        
+            <div style="display: flex; ">
+              <!-- Production Company -->
+              <div class="form-group" style="padding-right:20px">
+                <label for="ratingCompanies">Rating Company(Must have a rating of at least this value)</label>
+                <div style="display: flex; flex-direction: row; justify-content: start;">
+                <select formControlName="selectedRatingCompany">
+                  <option *ngFor="let key of ratingKeys" [value]="key">{{ key }}</option>
+                </select>
+                <div style="display: flex; flex-direction: column; padding-left: 5px;">
+                 <div *ngIf="this.ratingCompanies.get(this.searchForm.get('selectedRatingCompany')?.getRawValue()) !== null && this.ratingCompanies.get(this.searchForm.get('selectedRatingCompany')?.getRawValue()) !== undefined">
+                  <label> select a value from{{this.ratingCompanies.get(this.searchForm.get('selectedRatingCompany')?.getRawValue())}}</label>
+                 </div>
+                              <input 
+                  formControlName="minimumRating" 
+                  type="number" 
+                  placeholder="Min rating" 
+                  style="width: 50px; margin-left: 10px;"
+                  min="1"         
+                  max="10"         
+                  (input)="validateRating(this.ratingCompanies.get(this.searchForm.get('selectedRatingCompany')?.getRawValue()) ?? '') " >
+                  </div>
+                  <div style="padding-left:10px;">
+                    <button style="border-radius: 10px;"  (click)="addRatingCompany()">Add</button>
+                  </div>
+                  <div *ngFor="let rating of selectedRatingCompanies" class="selected-actor">
+                    <span class="selected-text">{{rating}}</span>
+                    <button class="clear-button" (click)="clearRating(rating)">✕</button>
+                  </div>
+                </div>
+                
+              </div>
+        
+             
+            </div>
+            <div style="display: flex;">
+              <!-- Year of Release -->
+              <div class="form-group">
+                <label for="year"> Minimum year of Release</label>
+                <input id="year" formControlName="year" type="number" min="1920" />
+              </div>
+            </div>
+            <!--Duration of movie-->
+            <div style="display: flex;">
+              <div class="form-group
+              ">
+                <label for="duration">Maximum duration in minutes</label>
+                <input id="duration" formControlName="duration" type="number" />
+              </div>
+            </div>
+        
+              <!-- Streaming Platforms -->
+              <div class="form-group">
+                <label>Streaming Platforms (Select all the streaming platforms you want to search over)</label>
+                <div class="checkbox-group">
+                  <div *ngFor="let platform of streamingPlatforms">
+                    <input
+                      type="checkbox"
+                      [value]="platform"
+                      (change)="onPlatformChange($event)"
+                    />
+                    {{ platform }}
+                  </div>
+                </div>
+              </div>
+            <div >
+              <div  style="display: flex; flex-direction: column;">
+                <label>Select Genres (Result must include)</label>
+                <div class="checkbox-group">
+                <div *ngFor="let genre of genres">
+                  <label>
+                    <input
+                      type="checkbox"
+                      [value]="genre"
+                      (change)="onGenreChange($event)"
+                      [checked]="selectedGenres.includes(genre)"
+                    />
+                    {{ genre }}
+                  </label>
+                </div>
+                </div>
+              </div>
+            </div>
+        
+              <!-- Search Button -->
+              <button type="submit">Search</button>
+            </form>
+          </section>
+    </div>
+
+   
+  
+    
+  </div>
