@@ -1,0 +1,295 @@
+<div class="admin-dashboard">
+  <header>
+    <h1>Admin Dashboard</h1>
+    <p>Date: {{ currentDate | date: 'fullDate' }}</p>
+    <p>Welcome, {{ admin?.username ?? '' }}</p>
+  </header>
+
+  <!-- Manage Movies Section -->
+  <h2>Manage Movies</h2>
+
+  <!-- Search Form -->
+  <form (submit)="searchMovies()" class="search-form">
+    <!-- Movie Search Input -->
+    <div class="form-group" *ngIf="!selectedTitle && !selectedYear">
+      <label for="movieName">Movie Name:</label>
+      <input
+        id="movieName"
+        type="text"
+        [(ngModel)]="searchCriteria.name"
+        name="name"
+        (ngModelChange)="onNameChange($event)"
+        class="form-control"
+      />
+      <div
+        *ngIf="showSuggestionsMovies && suggestedMovies.length > 0"
+        (click)="preventClose($event)"
+        class="suggestions-dropdown"
+      >
+        <ul>
+          <li
+            *ngFor="let movie of suggestedMovies"
+            (click)="selectMovieSuggestion(movie)"
+          >
+            {{ movie }}
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Selected Movie Card -->
+    <div *ngIf="selectedTitle && selectedYear" class="selected-card-container">
+      <span class="selected-card">
+        {{ selectedTitle }} ({{ selectedYear }})
+        <button type="button" class="close-button" (click)="unselectMovie()">×</button>
+      </span>
+    </div>
+
+    <button type="submit" class="btn">Search</button>
+  </form>
+
+  <!-- Movie Details Form -->
+  <div *ngIf="movie" class="movie-details-form">
+    <h3>Edit Movie Details</h3>
+    <form>
+      <!-- Title -->
+      <div class="form-group">
+        <label for="movieTitle">Title:</label>
+        <input
+          id="movieTitle"
+          type="text"
+          [(ngModel)]="movie.title"
+          name="title"
+          class="form-control"
+        />
+      </div>
+
+      <!-- Year -->
+      <div class="form-group">
+        <label for="movieYear">Year:</label>
+        <input
+          id="movieYear"
+          type="number"
+          [(ngModel)]="movie.year"
+          name="year"
+          class="form-control"
+        />
+      </div>
+
+      <!-- Duration -->
+      <div class="form-group">
+        <label for="movieDuration">Duration (mins):</label>
+        <input
+          id="movieDuration"
+          type="number"
+          [(ngModel)]="movie.durationMins"
+          name="durationMins"
+          class="form-control"
+        />
+      </div>
+
+      <!-- Description -->
+      <div class="form-group">
+        <label for="movieDescription">Description:</label>
+        <textarea
+          id="movieDescription"
+          [(ngModel)]="movie.description"
+          name="description"
+          class="form-control"
+          rows="3"
+        ></textarea>
+      </div>
+
+      <!-- Image URL -->
+      <div class="form-group">
+        <label for="movieImage">Image URL:</label>
+        <input
+          id="movieImage"
+          type="text"
+          [(ngModel)]="movie.image"
+          name="image"
+          class="form-control"
+        />
+      </div>
+      <div >
+        <img class="movie-image" [src]="movie.image" [alt]="movie.image" />
+      </div>
+
+      <!-- Actors -->
+      <div class="form-group">
+        <label>Actors:</label>
+        <div class="card-container">
+          <span class="card" *ngFor="let actor of actorsArray; let i = index">
+            {{ actor }}
+            <button type="button" class="close-button" (click)="removeActor(i)">×</button>
+          </span>
+          <button type="button" class="add-button" (click)="showAddActorPopup = true">+ Add Actor</button>
+        </div>
+      </div>
+
+      <!-- Directors -->
+      <div class="form-group">
+        <label>Directors:</label>
+        <div class="card-container">
+          <span class="card" *ngFor="let director of directorsArray; let i = index">
+            {{ director }}
+            <button type="button" class="close-button" (click)="removeDirector(i)">×</button>
+          </span>
+          <button type="button" class="add-button" (click)="showAddDirectorPopup = true">+ Add Director</button>
+        </div>
+      </div>
+
+      <!-- Streaming Services -->
+      <div class="form-group">
+        <label>Streaming Services:</label>
+        <div class="card-container">
+          <span class="card" *ngFor="let service of streamingServicesArray; let i = index">
+            {{ service }}
+            <button type="button" class="close-button" (click)="removeStreamingService(i)">×</button>
+          </span>
+          <button type="button" class="add-button" (click)="showAddStreamingServicePopup = true">+ Add Service</button>
+        </div>
+      </div>
+
+      <!-- Genres -->
+      <div class="form-group">
+        <label>Genres:</label>
+        <div class="card-container">
+          <span class="card" *ngFor="let genre of genresArray; let i = index">
+            {{ genre }}
+            <button type="button" class="close-button" (click)="removeGenre(i)">×</button>
+          </span>
+          <button type="button" class="add-button" (click)="showAddGenrePopup = true">+ Add Genre</button>
+        </div>
+      </div>
+
+      <!-- Ratings and Scores -->
+      <div class="form-group">
+        <label>Ratings and Scores:</label>
+        <div class="card-container">
+          <span class="card" *ngFor="let rating of ratingsArray; let i = index">
+            {{ rating.company }}: {{ rating.score }}
+            <button type="button" class="close-button" (click)="removeRating(i)">×</button>
+          </span>
+          <button type="button" class="add-button" (click)="showAddRatingPopup = true">+ Add Rating</button>
+        </div>
+      </div>
+
+      <!-- Save Button -->
+      <button type="button" class="btn" (click)="saveMovie()">Save</button>
+    </form>
+  </div>
+
+  <!-- Popups -->
+  <!-- Add Actor Popup -->
+  <div class="popup" *ngIf="showAddActorPopup">
+    <div class="popup-content">
+      <h3>Add Actor</h3>
+      <input
+        type="text"
+        [(ngModel)]="newActor"
+        placeholder="Actor Name"
+        class="form-control"
+        (ngModelChange)="onActorChange($event)"
+        name="newActor"
+      />
+
+      <div
+      *ngIf="showSuggestionsActors && suggestedActors.length > 0"
+      class="suggestions-dropdown2"
+      (mousedown)="preventClose($event)">
+      
+      <ul>
+        <li *ngFor="let actor of suggestedActors" (click)="selectActor(actor)">
+          {{ actor }}
+        </li>
+      </ul>
+    </div>
+      <button class="btn" (click)="addActor()">Add</button>
+      <button class="btn cancel" (click)="showAddActorPopup = false">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Add Director Popup -->
+  <div class="popup" *ngIf="showAddDirectorPopup">
+    <div class="popup-content">
+      <h3>Add Director</h3>
+      <input
+        type="text"
+        [(ngModel)]="newDirector"
+        placeholder="Director Name"
+        (ngModelChange)="onDirectorChange($event)"
+        class="form-control"
+        name="newDirector"
+      />
+      <div
+                    *ngIf="showSuggestionsDirectors && suggestedDirectors.length > 0"
+                    class="suggestions-dropdown2"
+                    (mousedown)="preventClose($event)"
+                  >
+                    <ul>
+                      <li *ngFor="let director of suggestedDirectors" (click)="selectDirector(director)">
+                        {{ director }}
+                      </li>
+                    </ul>
+                  </div>
+      <button class="btn" (click)="addDirector()">Add</button>
+      <button class="btn cancel" (click)="showAddDirectorPopup = false">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Add Streaming Service Popup -->
+  <div class="popup" *ngIf="showAddStreamingServicePopup">
+    <div class="popup-content">
+      <h3>Add Streaming Service</h3>
+      <input
+        type="text"
+        [(ngModel)]="newStreamingService"
+        placeholder="Service Name"
+        class="form-control"
+        name="newStreamingService"
+      />
+      <button class="btn" (click)="addStreamingService()">Add</button>
+      <button class="btn cancel" (click)="showAddStreamingServicePopup = false">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Add Genre Popup -->
+  <div class="popup" *ngIf="showAddGenrePopup">
+    <div class="popup-content">
+      <h3>Add Genre</h3>
+      <input
+        type="text"
+        [(ngModel)]="newGenre"
+        placeholder="Genre"
+        class="form-control"
+        name="newGenre"
+      />
+      <button class="btn" (click)="addGenre()">Add</button>
+      <button class="btn cancel" (click)="showAddGenrePopup = false">Cancel</button>
+    </div>
+  </div>
+
+  <!-- Add Rating Popup -->
+  <div class="popup" *ngIf="showAddRatingPopup">
+    <div class="popup-content">
+      <h3>Add Rating</h3>
+      <input
+        type="text"
+        [(ngModel)]="newRatingCompany"
+        placeholder="Rating Company"
+        class="form-control"
+        name="newRatingCompany"
+      />
+      <input
+        type="text"
+        [(ngModel)]="newRatingScore"
+        placeholder="Score"
+        class="form-control"
+        name="newRatingScore"
+      />
+      <button class="btn" (click)="addRating()">Add</button>
+      <button class="btn cancel" (click)="showAddRatingPopup = false">Cancel</button>
+    </div>
+  </div>
+</div>

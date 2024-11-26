@@ -3,7 +3,7 @@
     <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
       <!-- Username or Email -->
       <div class="form-group">
-        <label for="username">Username or Email</label>
+        <label for="username"> Email</label>
         <input
           type="text"
           id="username"
@@ -11,7 +11,7 @@
         />
         <!-- Validation Message -->
         <div *ngIf="loginForm.get('username')?.invalid && loginForm.get('username')?.touched" class="error">
-          Username or Email is required.
+           Email is required.
         </div>
       </div>
   

@@ -12,6 +12,8 @@ import { MovieFinderUserService } from './services/MovieFinderUser.service';
 import { LoginComponent } from './Login/login.component';
 import { UserPageComponent } from './UserPage/UserPage.component';
 import { ViewMovieComponent } from './View-Movie/ViewMovie.component';
+import { AdminPageComponent } from './AdminPage/Adminpage.component';
+import { AdminService } from './services/Admin.service';
 
 
 @NgModule({
@@ -21,7 +23,8 @@ import { ViewMovieComponent } from './View-Movie/ViewMovie.component';
     SignupComponent,
     LoginComponent,
     UserPageComponent,
-    ViewMovieComponent
+    ViewMovieComponent,
+    AdminPageComponent
   ],
   imports: [
     BrowserModule,
@@ -31,7 +34,7 @@ import { ViewMovieComponent } from './View-Movie/ViewMovie.component';
     AppRoutingModule,
     RouterModule  
   ],
-  providers: [MovieService,MovieFinderUserService],
+  providers: [MovieService,MovieFinderUserService,AdminService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

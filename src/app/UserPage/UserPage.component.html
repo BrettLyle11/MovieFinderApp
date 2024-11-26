@@ -21,7 +21,7 @@
     <div style="width:50%">
         <section class="search-filters">
             <h2>Search Movies</h2>
-            <form [formGroup]="searchForm" (ngSubmit)="onSearch()">
+            <form [formGroup]="searchForm" >
               <!-- Title -->
               <div style="display: flex;">
               <div class="form-group">
@@ -185,7 +185,7 @@
             </div>
         
               <!-- Search Button -->
-              <button type="submit">Search</button>
+              <button (click)=" onSearch()">Search</button>
             </form>
           </section>
     </div>
@@ -196,6 +196,7 @@
   </div>
 
   <div *ngIf="showResulst">
-<app-view-movie [movies] = "movieList" (closeMovieEvent)="handleCloseMovie()"></app-view-movie>
+
+      <app-view-movie [movies] = "movieList" (closeMovieEvent)="handleCloseMovie()"></app-view-movie>
 
   </div>

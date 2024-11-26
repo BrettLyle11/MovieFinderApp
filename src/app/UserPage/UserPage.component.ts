@@ -85,6 +85,7 @@ export class UserPageComponent implements OnInit {
     .subscribe((directorName) => {
       this.onDirectorNameChanged(directorName);
     });
+    this.showResulst = false;
   }
   onDirectorNameChanged(directorName: any) {
     this.movieService.searchForDirectorLikeNames(directorName).subscribe((response) => {
@@ -190,9 +191,17 @@ export class UserPageComponent implements OnInit {
 
   }
 
-  addRatingCompany(){
+  addRatingCompany(event?: Event) {
+    if (event) {
+      event.preventDefault(); // Prevent default form behavior
+      event.stopPropagation(); // Stop the event from bubbling up
+    }
+    
     let combined = this.searchForm.get('selectedRatingCompany')?.value + ':' + this.searchForm.get('minimumRating')?.value;
     this.selectedRatingCompanies.push(combined);
+    console.log('showResulst before:', this.showResulst);
+    this.showResulst = false; // Ensure it remains false
+    console.log('showResulst after:', this.showResulst);
   }
   clearRating(rating: string) {
     this.selectedRatingCompanies = this.selectedRatingCompanies.filter((r) => r !== rating);
@@ -206,6 +215,9 @@ export class UserPageComponent implements OnInit {
       this.selectedPlatforms = this.selectedPlatforms.filter((p) => p !== platform);
     }
     console.log('Selected Platforms:', this.selectedPlatforms);
+  }
+  debugEvent(event: Event) {
+    console.log('Event triggered:', event.type, 'on target:', event.target);
   }
 
   onSearch() {

@@ -7,9 +7,7 @@ import { NewUser } from '../models/NewUser';
     providedIn: 'root',
 })
 export class MovieFinderUserService {
-    static CreateUser(user: NewUser) {
-      throw new Error('Method not implemented.');
-    }
+    
 
     private signedInUser: any = null; 
 

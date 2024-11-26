@@ -4,6 +4,8 @@ import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { MovieFinderUserService } from '../services/MovieFinderUser.service';
 import { NewUser } from '../models/NewUser';
 import { Router } from '@angular/router';
+import { Admin } from '../models/Admin';
+import { AdminService } from '../services/Admin.service';
 
 interface LoginViewinterface {
     username: FormControl<string | null>;
@@ -20,7 +22,8 @@ export class LoginComponent {
 
   constructor(private fb: FormBuilder,
     private movieFinderUserService: MovieFinderUserService,
-    private router: Router
+    private router: Router,
+    private admin: AdminService
   ) {
     this.createForm();
   }
@@ -49,6 +52,11 @@ export class LoginComponent {
 
         this.movieFinderUserService.LoginUser(newUser).subscribe((data) => {
         if(data.message === "success"){
+          if(data.user === undefined){
+            this.admin.setUser(data.admin);
+            this.router.navigate(['/admin']);
+            return;
+          }
           this.movieFinderUserService.setUser(data.user);
             this.router.navigate(['/main']);
 
