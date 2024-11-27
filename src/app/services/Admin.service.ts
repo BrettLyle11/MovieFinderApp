@@ -35,6 +35,18 @@ export class AdminService {
         localStorage.setItem('admin', JSON.stringify(user));
     }
 
+    updateMovie(movie: any): Observable<any> {
+        return this.http.post('https://localhost:44302/api/movies/update', movie);
+    }
+
+    getMovieUpdateHistory(movie : SearchMovie): Observable<any> {
+        return this.http.post('https://localhost:44302/api/movies/GrabUpdateHistory', movie);
+    }
+
+    addRatingCompanyWithScale(ratingCompany: any): Observable<any> {
+        return this.http.post('https://localhost:44302/api/movies/NewRatingScale', ratingCompany);
+    }
+
     getUser(): Admin | undefined {
         return this.signedInUser;
     }

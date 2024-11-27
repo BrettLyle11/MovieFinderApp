@@ -44,6 +44,14 @@
             </li>
           </ul>
         </div>
+        <div class="stat" *ngIf="currentMovie.productionCompanies">
+          <h3>Production Companies</h3>
+          <ul>
+            <li *ngFor="let company of parseList(currentMovie.productionCompanies)">
+              {{ company }}
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   

@@ -9,4 +9,5 @@ export interface Movie {
     streamingServices: string;
     title: string;
     year: number;
+    productionCompanies: string;
   }

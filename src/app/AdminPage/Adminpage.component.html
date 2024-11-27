@@ -9,7 +9,7 @@
   <h2>Manage Movies</h2>
 
   <!-- Search Form -->
-  <form (submit)="searchMovies()" class="search-form">
+  <form (submit)="searchMovies()" class="search-form" *ngIf="!hasSearched">
     <!-- Movie Search Input -->
     <div class="form-group" *ngIf="!selectedTitle && !selectedYear">
       <label for="movieName">Movie Name:</label>
@@ -38,7 +38,7 @@
     </div>
 
     <!-- Selected Movie Card -->
-    <div *ngIf="selectedTitle && selectedYear" class="selected-card-container">
+    <div *ngIf="selectedTitle && selectedYear " class="selected-card-container">
       <span class="selected-card">
         {{ selectedTitle }} ({{ selectedYear }})
         <button type="button" class="close-button" (click)="unselectMovie()">×</button>
@@ -47,6 +47,26 @@
 
     <button type="submit" class="btn">Search</button>
   </form>
+
+  <div *ngIf="movie && adminMovieUpdateHistory.length > 0"  style="width: 25%;">
+  <h2>Edit History</h2>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Admin Id</th>
+        <th>Edited By</th>
+        <th>Edited On</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let history of adminMovieUpdateHistory">
+        <td>{{ history.adminID }}</td>
+        <td>{{ history.username }}</td>
+        <td>{{ history.date }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
 
   <!-- Movie Details Form -->
   <div *ngIf="movie" class="movie-details-form">
@@ -145,9 +165,9 @@
         <div class="card-container">
           <span class="card" *ngFor="let service of streamingServicesArray; let i = index">
             {{ service }}
-            <button type="button" class="close-button" (click)="removeStreamingService(i)">×</button>
+            
           </span>
-          <button type="button" class="add-button" (click)="showAddStreamingServicePopup = true">+ Add Service</button>
+          <button type="button" class="add-button" (click)="showAddStreamingServicePopup = true">+ Edit Service</button>
         </div>
       </div>
 
@@ -157,9 +177,9 @@
         <div class="card-container">
           <span class="card" *ngFor="let genre of genresArray; let i = index">
             {{ genre }}
-            <button type="button" class="close-button" (click)="removeGenre(i)">×</button>
+           
           </span>
-          <button type="button" class="add-button" (click)="showAddGenrePopup = true">+ Add Genre</button>
+          <button type="button" class="add-button" (click)="showAddGenrePopup = true">+ Edit Genre</button>
         </div>
       </div>
 
@@ -174,9 +194,23 @@
           <button type="button" class="add-button" (click)="showAddRatingPopup = true">+ Add Rating</button>
         </div>
       </div>
+<!--Production Companies-->
+      <div class="form-group">
+        <label>Production Companies</label>
+        <div class="card-container">
+          <span class="card" *ngFor="let company of productionCompaniesArray; let i = index">
+            {{ company }}
+            <button type="button" class="close-button" (click)="removeProdCompany(i)">×</button>
+          </span>
+          <button type="button" class="add-button" (click)="showAddProductionCompanyPopup = true">
+            + Production Company
+          </button>
+        </div>
+      </div>
 
       <!-- Save Button -->
       <button type="button" class="btn" (click)="saveMovie()">Save</button>
+      <button type="button"  (click)="cancelMovie()">Cancel</button>
     </form>
   </div>
 
@@ -238,58 +272,169 @@
     </div>
   </div>
 
-  <!-- Add Streaming Service Popup -->
   <div class="popup" *ngIf="showAddStreamingServicePopup">
     <div class="popup-content">
-      <h3>Add Streaming Service</h3>
-      <input
-        type="text"
-        [(ngModel)]="newStreamingService"
-        placeholder="Service Name"
-        class="form-control"
-        name="newStreamingService"
-      />
-      <button class="btn" (click)="addStreamingService()">Add</button>
-      <button class="btn cancel" (click)="showAddStreamingServicePopup = false">Cancel</button>
+      <h3>Select Streaming Services</h3>
+
+      <!-- Available Platforms -->
+      <div class="platform-selector">
+        <label *ngFor="let platform of streamingPlatforms" class="checkbox-label">
+          <input
+            type="checkbox"
+            [checked]="streamingServicesArray.includes(platform)"
+            (change)="togglePlatformSelection(platform)"
+          />
+          {{ platform }}
+        </label>
+      </div>
+
+      <!-- Selected Platforms -->
+      <div class="selected-platforms">
+        <h4>Selected Platforms:</h4>
+        <div class="platform-chip" *ngFor="let platform of selectedPlatforms">
+          {{ platform }}
+          
+        </div>
+      </div>
+
+      <!-- Popup Actions -->
+      <button class="btn" (click)="confirmPlatforms()">Confirm</button>
+      <button class="btn cancel" (click)="cancelPlatformEdit()">
+        Cancel
+      </button>
     </div>
   </div>
-
   <!-- Add Genre Popup -->
   <div class="popup" *ngIf="showAddGenrePopup">
-    <div class="popup-content">
-      <h3>Add Genre</h3>
-      <input
-        type="text"
-        [(ngModel)]="newGenre"
-        placeholder="Genre"
-        class="form-control"
-        name="newGenre"
-      />
-      <button class="btn" (click)="addGenre()">Add</button>
-      <button class="btn cancel" (click)="showAddGenrePopup = false">Cancel</button>
+  <div class="popup-content">
+    <h3>Select Genres</h3>
+
+    <!-- Genre Selection -->
+    <div class="genre-selector">
+      <label *ngFor="let genre of genres" class="checkbox-label">
+        <input
+          type="checkbox"
+          [checked]="selectedGenres.includes(genre)"
+          (change)="toggleGenreSelection(genre)"
+        />
+        {{ genre }}
+      </label>
     </div>
+
+    <!-- Selected Genres -->
+    <div class="selected-genres">
+      <h4>Selected Genres:</h4>
+      <div class="genre-chip" *ngFor="let genre of selectedGenres">
+        {{ genre }}
+        
+      </div>
+    </div>
+
+    <!-- Popup Actions -->
+    <button class="btn" (click)="confirmGenres()">Confirm</button>
+    <button class="btn cancel" (click)="cancelGenreEdit()">Cancel</button>
   </div>
+</div>
+<div class="popup" *ngIf="showAddProductionCompanyPopup">
+  <div class="popup-content">
+    <h3>Add Production Company</h3>
+
+    <!-- Input for Production Company -->
+    <input
+      type="text"
+      [(ngModel)]="newProductionCompany"
+      placeholder="Enter Production Company"
+      class="form-control"
+      name="newProductionCompany"
+      (ngModelChange)="onProductionCompanyChange($event)"
+    />
+
+    <!-- Suggestions Dropdown -->
+    <div
+      *ngIf="showSuggestionsProductionCompanies && suggestedProductionCompanies.length > 0"
+      class="suggestions-dropdown2"
+    >
+      <ul>
+        <li
+          *ngFor="let company of suggestedProductionCompanies"
+          (click)="selectProductionCompany(company)"
+        >
+          {{ company }}
+        </li>
+      </ul>
+    </div>
+
+    <!-- Buttons -->
+    <button class="btn" (click)="addProductionCompany()">Add</button>
+    <button class="btn cancel" (click)="cancelAddProductionCompany()">Cancel</button>
+  </div>
+</div>
 
   <!-- Add Rating Popup -->
   <div class="popup" *ngIf="showAddRatingPopup">
     <div class="popup-content">
       <h3>Add Rating</h3>
-      <input
-        type="text"
-        [(ngModel)]="newRatingCompany"
-        placeholder="Rating Company"
-        class="form-control"
-        name="newRatingCompany"
-      />
-      <input
-        type="text"
-        [(ngModel)]="newRatingScore"
-        placeholder="Score"
-        class="form-control"
-        name="newRatingScore"
-      />
-      <button class="btn" (click)="addRating()">Add</button>
-      <button class="btn cancel" (click)="showAddRatingPopup = false">Cancel</button>
+  
+      <!-- Dropdown or New Company Input -->
+      <div *ngIf="!isAddingNewCompany">
+        <label for="ratingCompanyDropdown">Select Rating Company:</label>
+        <select
+          id="ratingCompanyDropdown"
+          [(ngModel)]="selectedRatingCompany"
+          class="form-control"
+        >
+          <option *ngFor="let company of suggestedRatingCompanies" [value]="company.ratingCompanyName">
+            {{ company.ratingCompanyName }} (Scale: {{ company.ratingScale }})
+          </option>
+        </select>
+        <button class="btn small" (click)="isAddingNewCompany = true">+ Add New Company</button>
+      </div>
+  
+      <!-- Add New Company -->
+      <div *ngIf="isAddingNewCompany">
+        <label for="newRatingCompany">New Rating Company:</label>
+        <input
+          id="newRatingCompany"
+          type="text"
+          [(ngModel)]="newRatingCompany"
+          placeholder="Enter new company name"
+          class="form-control"
+        />
+  
+        <label for="newRatingScale">Select Scale:</label>
+        <select
+          id="newRatingScale"
+          [(ngModel)]="newRatingScale"
+          class="form-control"
+        >
+          <option value="" disabled selected>Select scale</option>
+          <option value="1-10">1-10</option>
+          <option value="1-100">1-100</option>
+        </select>
+  
+        <button class="btn small" (click)="isAddingNewCompany = false">Cancel</button>
+        <button class="btn small" (click)="addNewRatingCompany()">Add</button>
+      </div>
+  
+      <!-- Score Input -->
+      <div class="form-group" *ngIf="!isAddingNewCompany" >
+        <label for="ratingScore">Score (Scale: {{ selectedRatingScale || 'N/A' }}):</label>
+        <input
+          id="ratingScore"
+          type="number"
+          [(ngModel)]="newRatingScore"
+          placeholder="Enter score"
+          class="form-control"
+          [disabled]="!selectedRatingCompany && !isAddingNewCompany"
+        />
+        <small *ngIf="!validateScoreInput()" class="error">
+          Score must be within the scale of {{ selectedRatingScale }}.
+        </small>
+      </div>
+  
+      <!-- Buttons -->
+      <button class="btn" (click)="addRating()" *ngIf="!isAddingNewCompany">Add</button>
+      <button class="btn cancel" (click)="showAddRatingPopup = false" *ngIf="!isAddingNewCompany">Cancel</button>
     </div>
   </div>
 </div>

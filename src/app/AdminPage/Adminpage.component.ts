@@ -3,8 +3,10 @@ import { AdminService } from '../services/Admin.service';
 import { Admin } from '../models/Admin';
 import { Router } from '@angular/router';
 import { SearchMovie } from '../models/SearchMovie';
-import { Movie } from '../models/Movie'; // Import the Movie interface
+import { Movie } from '../models/Movie'; 
 import { MovieService } from '../services/movie.service';
+import { Genre } from '../services/Genres.service';
+import { AdminMovieUpdates } from '../models/AdminMovieUpdate';
 
 @Component({
   selector: 'app-adminpage',
@@ -23,6 +25,8 @@ export class AdminPageComponent implements OnInit {
   hasSearched: boolean = false;
   selectedTitle: string = '';
   selectedYear: number = 0;
+
+  adminMovieUpdateHistory: AdminMovieUpdates[] = [];
 
   // Variables for adding new entities
   newGenre: string = '';
@@ -45,8 +49,10 @@ export class AdminPageComponent implements OnInit {
   streamingServicesArray: string[] = [];
   genresArray: string[] = [];
   ratingsArray: { company: string; score: string }[] = [];
+  productionCompaniesArray: string[] = [];
 
   // Popup visibility flags and other BS
+  showAddProductionCompanyPopup: boolean = false;
   showAddActorPopup: boolean = false;
   showAddDirectorPopup: boolean = false;
   showAddStreamingServicePopup: boolean = false;
@@ -57,9 +63,22 @@ export class AdminPageComponent implements OnInit {
   clickApplied: boolean = false;
   showSuggestionsDirectors: boolean = false;
   suggestedDirectors: string[] = [];
+  suggestedProductionCompanies: string[] = []; // Example suggestions
+  newProductionCompany: string = ''; // Input value
+  showSuggestionsProductionCompanies: boolean = false;
+
  
   streamingPlatforms: string[] = ['Apple TV', 'Netflix', 'BritBox', 'Disney+', 'Crave', 'Curiosity Stream', 'Hotstar','Mubi','Paramount+','Pulto TV', 'Prime Video', 'Tubi', 'Zee5'];
   selectedPlatforms: string[] = [];
+
+  genres: string[] = Object.values(Genre); 
+
+  selectedGenres: string[] = [];
+  suggestedRatingCompanies: any;
+  selectedRatingCompany: string | null = null; // Selected rating company name
+  isAddingNewCompany: boolean = false; // Flag to toggle adding a new company
+  newRatingScale: any;
+
 
   constructor(
     private adminService: AdminService,
@@ -79,6 +98,12 @@ export class AdminPageComponent implements OnInit {
       // Admin user is logged in; proceed with any additional initialization
       console.log('Logged in as:', this.admin);
     }
+
+    this.movieService.getAllRatingCompanies().subscribe((response) => {
+      console.log('Rating companies:', response);
+      this.suggestedRatingCompanies = response;
+    });
+    
   }
 
   @HostListener('document:click', ['$event'])
@@ -88,6 +113,149 @@ export class AdminPageComponent implements OnInit {
     if (targetElement && !this.elementRef.nativeElement.contains(targetElement)) {
       this.showSuggestionsMovies = false;
     }
+  }
+
+  get selectedRatingScale(): string {
+    const company = this.suggestedRatingCompanies.find(
+      (c: { ratingCompanyName: string | null; }) => c.ratingCompanyName === this.selectedRatingCompany
+    );
+    return company ? company.ratingScale : this.newRatingScale;
+  }
+
+  // Validate score input based on the selected rating scale
+  validateScoreInput(): boolean {
+    if (!this.selectedRatingScale) {
+      return true; // No validation if no scale is selected
+    }
+    const [min, max] = this.selectedRatingScale.split('-').map(Number);
+    const score = Number(this.newRatingScore);
+    return score >= min && score <= max;
+  }
+
+  // Add a rating
+  addRating(): void {
+    if (this.isAddingNewCompany) {
+      if (!this.newRatingCompany.trim()) {
+        alert('Please provide a name for the new rating company.');
+        return;
+      }
+
+      if (!this.newRatingScale) {
+        alert('Please select a scale for the new rating company.');
+        return;
+      }
+    }
+
+    if (!this.validateScoreInput()) {
+      alert(
+        `Score must be within the scale of ${this.selectedRatingScale} for the selected rating company.`
+      );
+      return;
+    }
+
+    if (this.selectedRatingCompany) {
+      this.ratingsArray.push({ company: this.selectedRatingCompany, score: this.newRatingScore });
+    } else {
+      alert('Please select a rating company.');
+    }
+    
+
+    // Clear inputs and close popup
+    this.resetRatingInputs();
+    this.showAddRatingPopup = false;
+  }
+
+  // Reset inputs
+  resetRatingInputs(): void {
+    this.newRatingCompany = '';
+    this.newRatingScale = '';
+    this.newRatingScore = '';
+    this.selectedRatingCompany = null;
+    this.isAddingNewCompany = false;
+  }
+
+
+  toggleGenreSelection(genre: string): void {
+    if (this.selectedGenres.includes(genre)) {
+      // Remove if already selected
+      this.selectedGenres = this.selectedGenres.filter((g) => g !== genre);
+    } else {
+      // Add if not selected
+      this.selectedGenres.push(genre);
+    }
+    console.log('Genres remain unchanged:', this.genresArray);
+  }
+
+  // Confirm selected genres and close popup
+  confirmGenres(): void {
+    console.log('Selected genres:', this.selectedGenres);
+    this.genresArray = JSON.parse(JSON.stringify(this.selectedGenres)); // Update the main genres array
+    console.log('Genres remain unchanged:', this.genresArray);
+    this.showAddGenrePopup = false;
+  }
+
+  // Cancel genre editing and close popup
+  cancelGenreEdit(): void {
+    console.log('Genres remain unchanged:', this.genresArray);
+    this.selectedGenres = JSON.parse(JSON.stringify(this.genresArray));
+    this.showAddGenrePopup = false;
+  }
+
+  togglePlatformSelection(platform: string): void {
+    if (this.selectedPlatforms.includes(platform)) {
+      // Remove if already selected
+      this.selectedPlatforms = this.selectedPlatforms.filter(
+        (p) => p !== platform
+      );
+    } else {
+      // Add if not selected
+      this.selectedPlatforms.push(platform);
+    }
+  }
+
+  // Confirm selected platforms and close popup
+  confirmPlatforms(): void {
+    console.log('Selected platforms:', this.selectedPlatforms);
+    this.streamingServicesArray = JSON.parse(JSON.stringify(this.selectedPlatforms));
+    this.showAddStreamingServicePopup = false;
+  }
+
+  cancelPlatformEdit(): void{
+    console.log('Selected platforms:', this.streamingServicesArray);
+    this.selectedPlatforms = JSON.parse(JSON.stringify(this.streamingServicesArray));
+    this.showAddStreamingServicePopup = false;
+  }
+
+  onProductionCompanyChange(value: string): void {
+    this.showSuggestionsProductionCompanies = true;
+    this.newProductionCompany = value;
+    this.movieService.getProductionCompanies(value).subscribe((response) => {
+      console.log('Production company suggestions:', response);
+      this.suggestedProductionCompanies = response;
+    });
+  }
+
+  // Add a production company
+  addProductionCompany(): void {
+    if (this.newProductionCompany.trim() && !this.productionCompaniesArray.includes(this.newProductionCompany)) {
+      this.productionCompaniesArray.push(this.newProductionCompany.trim());
+    }
+    this.newProductionCompany = ''; // Clear input
+    this.showSuggestionsProductionCompanies = false; 
+    this.showAddProductionCompanyPopup = false; // Close pop-up
+  }
+
+  // Select a production company from suggestions
+  selectProductionCompany(company: string): void {
+    this.newProductionCompany = company;
+    this.showSuggestionsProductionCompanies = false; // Hide suggestions
+  }
+
+  // Cancel adding a production company
+  cancelAddProductionCompany(): void {
+    this.newProductionCompany = ''; // Clear input
+    
+    this.showAddProductionCompanyPopup = false; // Close pop-up
   }
 
   onNameChange(newValue: string): void {
@@ -130,9 +298,17 @@ export class AdminPageComponent implements OnInit {
             return { company: company.trim(), score: score.trim() };
           })
         : [];
+      this.productionCompaniesArray = this.movie?.productionCompanies ? this.movie.productionCompanies.split(',').map(s => s.trim()) : [];
 
       console.log('Search results:', this.movie);
-      this.streamingPlatforms = this.streamingPlatforms
+      this.selectedPlatforms = JSON.parse(JSON.stringify(this.streamingServicesArray));
+      this.selectedGenres = JSON.parse(JSON.stringify(this.genresArray));
+      console.log('Production companies:', this.productionCompaniesArray);
+    });
+
+    this.adminService.getMovieUpdateHistory(searchCriteria).subscribe((response) => {
+      console.log('Update history:', response);
+      this.adminMovieUpdateHistory = response;
     });
   }
 
@@ -142,13 +318,31 @@ export class AdminPageComponent implements OnInit {
 
   selectMovieSuggestion(movie: string): void {
     console.log('Selected movie:', movie);
-    const [title, year] = movie.split(':');
-    this.selectedTitle = title.trim();
-    this.selectedYear = Number(year.trim());
+  
+    // Find the position of the last colon in the string
+    const lastColonIndex = movie.lastIndexOf(':');
+  
+    if (lastColonIndex !== -1) {
+      // Extract the title and year based on the last colon position
+      this.selectedTitle = movie.substring(0, lastColonIndex).trim();
+      const yearString = movie.substring(lastColonIndex + 1).trim();
+      this.selectedYear = Number(yearString);
+    } else {
+      // Handle the case where no colon is found
+      this.selectedTitle = movie.trim();
+      this.selectedYear = 0; // or set to undefined or handle accordingly
+    }
+  
     this.showSuggestionsMovies = false;
     this.searchCriteria.name = this.selectedTitle;
+  
     // Optionally trigger a search
     // this.searchMovies();
+  }
+
+  cancelMovie(): void {
+    this.hasSearched = false;
+    this.unselectMovie();
   }
 
   unselectMovie(): void {
@@ -197,6 +391,11 @@ export class AdminPageComponent implements OnInit {
     this.directorsArray.splice(index, 1);
   }
 
+  removeProdCompany(index: number): void {
+    this.productionCompaniesArray.splice(index, 1);
+  }
+
+
   addDirector(): void {
     if (this.newDirector) {
       this.directorsArray.push(this.newDirector.trim());
@@ -218,35 +417,13 @@ export class AdminPageComponent implements OnInit {
     }
   }
 
-  // Functions to manage genres
-  removeGenre(index: number): void {
-    this.genresArray.splice(index, 1);
-  }
-
-  addGenre(): void {
-    if (this.newGenre) {
-      this.genresArray.push(this.newGenre.trim());
-      this.newGenre = '';
-      this.showAddGenrePopup = false;
-    }
-  }
 
   // Functions to manage ratings
   removeRating(index: number): void {
     this.ratingsArray.splice(index, 1);
   }
 
-  addRating(): void {
-    if (this.newRatingCompany && this.newRatingScore) {
-      this.ratingsArray.push({
-        company: this.newRatingCompany.trim(),
-        score: this.newRatingScore.trim(),
-      });
-      this.newRatingCompany = '';
-      this.newRatingScore = '';
-      this.showAddRatingPopup = false;
-    }
-  }
+
 
   onActorChange(actorName: any) {
     this.movieService.searchForActorLikeNames(actorName).subscribe((response) => {
@@ -281,13 +458,33 @@ export class AdminPageComponent implements OnInit {
     this.clickApplied = true;
   }
 
+  addNewRatingCompany(){
+    
+
+    var newRatingCompantRequest =
+  {
+    ratingCompanyName: this.newRatingCompany,
+    scale: this.newRatingScale,
+  }
+
+  this.adminService.addRatingCompanyWithScale(newRatingCompantRequest).subscribe((response) => {
+    console.log('New rating company added:', response);
+    this.movieService.getAllRatingCompanies().subscribe((response) => {
+      console.log('Rating companies:', response);
+      this.suggestedRatingCompanies = response;
+      this.newRatingCompany = '';
+      this.newRatingScale = '';
+    });
+  });
+  this.isAddingNewCompany = false;
+  }
+
   
 
   // Function to save the edited movie data
   saveMovie(): void {
     if (this.movie && this.originalMovie) {
       // Prepare the data to be sent to the API
-      // Combine arrays back into comma-separated strings
       const editedMovie: Movie = {
         title: this.movie.title,
         year: this.movie.year,
@@ -299,43 +496,119 @@ export class AdminPageComponent implements OnInit {
         streamingServices: this.streamingServicesArray.join(','),
         genres: this.genresArray.join(','),
         ratingsAndScores: this.ratingsArray.map(r => `${r.company}:${r.score}`).join(','),
+        productionCompanies: this.productionCompaniesArray.join(','),
       };
-
+  
       const fieldsToCheck: (keyof Movie)[] = ['title', 'year', 'durationMins', 'description', 'image'];
-
+  
       const dto = {
         originalTitle: this.originalMovie.title,
         originalYear: this.originalMovie.year,
-        updatedFields: {} as Partial<Record<keyof Movie, string | number>>, // Define type
+        updatedFields: {} as Partial<Record<keyof Movie, string | number>>,
+        changes: {
+          added: {} as Partial<Record<keyof Movie, string[]>>,
+          removed: {} as Partial<Record<keyof Movie, string[]>>,
+        },
+        adminUsername : this.admin?.username,
+        adminId : this.admin?.adminID
       };
-
+  
+      // Check simple fields for changes
       fieldsToCheck.forEach((field) => {
         if (this.movie![field] !== this.originalMovie![field]) {
-          dto.updatedFields[field] = this.movie![field]; // Safely assign updated value
+          dto.updatedFields[field] = this.movie![field];
         }
       });
-
-      // Check for changes in string fields (arrays as comma-separated strings)
-      if (editedMovie.actors !== this.originalMovie.actors) {
-        dto.updatedFields['actors'] = editedMovie.actors;
+  
+      // Helper function for array comparison
+      const getAddedAndRemoved = (original: string[], updated: string[]) => {
+        const added = updated.filter(item => !original.includes(item));
+        const removed = original.filter(item => !updated.includes(item));
+        return { added, removed };
+      };
+  
+      // Compare actors
+      const actorsChanges = getAddedAndRemoved(
+        this.originalMovie.actors ? this.originalMovie.actors.split(',').map(s => s.trim()) : [],
+        this.actorsArray
+      );
+      if (actorsChanges.added.length || actorsChanges.removed.length) {
+        dto.changes.added['actors'] = actorsChanges.added;
+        dto.changes.removed['actors'] = actorsChanges.removed;
       }
-      if (editedMovie.directors !== this.originalMovie.directors) {
-        dto.updatedFields['directors'] = editedMovie.directors;
+  
+      // Compare directors
+      const directorsChanges = getAddedAndRemoved(
+        this.originalMovie.directors ? this.originalMovie.directors.split(',').map(s => s.trim()) : [],
+        this.directorsArray
+      );
+      if (directorsChanges.added.length || directorsChanges.removed.length) {
+        dto.changes.added['directors'] = directorsChanges.added;
+        dto.changes.removed['directors'] = directorsChanges.removed;
       }
-      if (editedMovie.streamingServices !== this.originalMovie.streamingServices) {
-        dto.updatedFields['streamingServices'] = editedMovie.streamingServices;
+  
+      // Compare streaming services
+      const streamingChanges = getAddedAndRemoved(
+        this.originalMovie.streamingServices ? this.originalMovie.streamingServices.split(',').map(s => s.trim()) : [],
+        this.streamingServicesArray
+      );
+      if (streamingChanges.added.length || streamingChanges.removed.length) {
+        dto.changes.added['streamingServices'] = streamingChanges.added;
+        dto.changes.removed['streamingServices'] = streamingChanges.removed;
       }
-      if (editedMovie.genres !== this.originalMovie.genres) {
-        dto.updatedFields['genres'] = editedMovie.genres;
+  
+      // Compare genres
+      const genresChanges = getAddedAndRemoved(
+        this.originalMovie.genres ? this.originalMovie.genres.split(',').map(s => s.trim()) : [],
+        this.genresArray
+      );
+      if (genresChanges.added.length || genresChanges.removed.length) {
+        dto.changes.added['genres'] = genresChanges.added;
+        dto.changes.removed['genres'] = genresChanges.removed;
       }
-      if (editedMovie.ratingsAndScores !== this.originalMovie.ratingsAndScores) {
-        dto.updatedFields['ratingsAndScores'] = editedMovie.ratingsAndScores;
+  
+      // Compare ratings and scores
+      const originalRatings = this.originalMovie.ratingsAndScores
+        ? this.originalMovie.ratingsAndScores.split(',').map((item) => {
+            const [company, score] = item.split(':');
+            return { company: company.trim(), score: score.trim() };
+          })
+        : [];
+      const updatedRatings = this.ratingsArray;
+  
+      const ratingsChanges = {
+        added: updatedRatings.filter(
+          ur => !originalRatings.some(or => or.company === ur.company && or.score === ur.score)
+        ),
+        removed: originalRatings.filter(
+          or => !updatedRatings.some(ur => ur.company === or.company && ur.score === or.score)
+        ),
+      };
+  
+      if (ratingsChanges.added.length || ratingsChanges.removed.length) {
+        dto.changes.added['ratingsAndScores'] = ratingsChanges.added.map(r => `${r.company}:${r.score}`);
+        dto.changes.removed['ratingsAndScores'] = ratingsChanges.removed.map(r => `${r.company}:${r.score}`);
       }
-
-      // Currently, the save function does nothing
-      // You can add the code to send 'dto' to the API here
-
+  
+      // Compare production companies
+      const productionChanges = getAddedAndRemoved(
+        this.originalMovie.productionCompanies ? this.originalMovie.productionCompanies.split(',').map(s => s.trim()) : [],
+        this.productionCompaniesArray
+      );
+      if (productionChanges.added.length || productionChanges.removed.length) {
+        dto.changes.added['productionCompanies'] = productionChanges.added;
+        dto.changes.removed['productionCompanies'] = productionChanges.removed;
+      }
+  
+      // Log the DTO or send it to the API
       console.log('DTO ready to send to API:', dto);
+
+      this.adminService.updateMovie(dto).subscribe((response) => {
+        console.log('Update response:', response);
+        this.searchMovies();
+        
+      });
     }
   }
+  
 }

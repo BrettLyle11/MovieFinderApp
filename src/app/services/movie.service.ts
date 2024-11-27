@@ -28,4 +28,9 @@ export class MovieService {
   getAllRatingCompanies(): Observable<any> {
     return this.http.get('https://localhost:44302/api/movies/getAllRatingCompanies');
   }
+
+  getProductionCompanies(companyName: string): Observable<any> {
+    console.log(companyName);
+    return this.http.post('https://localhost:44302/api/movies/GetSuggestProductionCompanies/'+ companyName,null);
+  }
 }
