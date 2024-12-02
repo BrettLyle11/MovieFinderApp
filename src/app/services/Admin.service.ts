@@ -1,8 +1,10 @@
 import { Injectable } from "@angular/core";
 import { Admin } from "../models/Admin";
-import { HttpClient } from "@angular/common/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import { Observable } from "rxjs";
 import { SearchMovie } from "../models/SearchMovie";
+import { Movie } from "../models/Movie";
+import { UserWPsswDTO } from "../models/UserWPsswDTO";
 
 @Injectable({
     providedIn: 'root',
@@ -54,6 +56,36 @@ export class AdminService {
     clearUser() {
         this.signedInUser = undefined;
         localStorage.removeItem('admin');
+    }
+
+    createMovie(movie: Movie): Observable<any> {
+        return this.http.post('https://localhost:44302/api/movies/createMovie', movie);
+    }
+
+    searchUserNames(name: String): Observable<any> {
+        return this.http.post('https://localhost:44302/api/movies/searchUsers/'+name, null);
+    }
+
+    getUserInfo(username: String): Observable<any> {
+        return this.http.post('https://localhost:44302/api/movies/getUser/'+username, null);
+    }
+    
+    updateUserInfo(user: UserWPsswDTO, admin: Admin): Observable<any> {
+        // Prepare query parameters for the `Admin` object
+        let params = new HttpParams();
+        if (admin.adminID !== undefined) {
+            params = params.set('adminID', admin.adminID.toString());
+        }
+        if (admin.username) {
+            params = params.set('username', admin.username);
+        }
+    
+        // Make the HTTP POST request with the User object in the body and Admin in the query string
+        return this.http.post('https://localhost:44302/api/movies/updateUser', user, { params });
+    }
+
+    getUserEditHistory(username: number): Observable<any> {
+        return this.http.get('https://localhost:44302/api/movies/userUpdateHistory/'+username);
     }
 
     // Add more methods as needed

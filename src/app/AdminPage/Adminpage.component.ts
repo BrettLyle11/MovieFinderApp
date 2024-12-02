@@ -7,6 +7,8 @@ import { Movie } from '../models/Movie';
 import { MovieService } from '../services/movie.service';
 import { Genre } from '../services/Genres.service';
 import { AdminMovieUpdates } from '../models/AdminMovieUpdate';
+import { UserWPsswDTO } from '../models/UserWPsswDTO';
+import { combineLatest } from 'rxjs';
 
 @Component({
   selector: 'app-adminpage',
@@ -16,6 +18,18 @@ import { AdminMovieUpdates } from '../models/AdminMovieUpdate';
 export class AdminPageComponent implements OnInit {
   admin: Admin | undefined;
   currentDate: Date = new Date();
+
+  isCreatingMovie: boolean = false;
+
+  editingUser: boolean = false;
+  userSearchString: string = '';
+  showSuggestionsUsers: boolean = false;
+  suggestedUsers: string[] = [];
+
+  user: UserWPsswDTO | undefined = undefined;
+  copyOfUser: UserWPsswDTO | undefined = undefined;
+
+  userEditHistory: any[] = [];
 
   // Variables for managing movies
   searchCriteria: { name: string; year: number | undefined } = {
@@ -78,6 +92,13 @@ export class AdminPageComponent implements OnInit {
   selectedRatingCompany: string | null = null; // Selected rating company name
   isAddingNewCompany: boolean = false; // Flag to toggle adding a new company
   newRatingScale: any;
+
+
+  newMovieTitle: string = '';
+  newMovieYear: number = 0;
+  newMovieDuration: number = 0;
+  newMovieDescription: string = '';
+  newMovieImage: string = '';
 
 
   constructor(
@@ -312,6 +333,22 @@ export class AdminPageComponent implements OnInit {
     });
   }
 
+  
+
+  onUserNameChange(value: string): void {
+    if (value) {
+      this.adminService.searchUserNames(value).subscribe((data) => {
+        console.log('Suggested users:', data);
+        this.suggestedUsers = data ;
+        this.showSuggestionsUsers = true;
+      });
+    } else {
+      this.suggestedUsers = [];
+      this.showSuggestionsUsers = false;
+    }
+
+  }
+
   preventClose(event: MouseEvent): void {
     event.stopPropagation();
   }
@@ -339,9 +376,56 @@ export class AdminPageComponent implements OnInit {
     // Optionally trigger a search
     // this.searchMovies();
   }
+  selectUserSuggestion(user: string): void {
+    this.userSearchString = user;
+    this.showSuggestionsUsers = false;
+    
+  }
+  searchUserOffEmail(){
+    this.adminService.getUserInfo(this.userSearchString).subscribe((data) => {
+      console.log('User info:', data);2
+      this.user = data;
+      this.copyOfUser = JSON.parse(JSON.stringify(data));
+      this.adminService.getUserEditHistory(this.user?.id!).subscribe((response: any) => {
+        
+        this.userEditHistory = response;
+        console.log('User edit history:', this.userEditHistory);
+
+      });
+    });
+  }
+
+  updateUser(): void {
+    if(JSON.parse(JSON.stringify(this.copyOfUser)) === JSON.parse(JSON.stringify(this.user))){
+      alert('No changes detected.');
+      return;
+    }
+    console.log('Updating user:', this.user);
+    this.adminService.updateUserInfo(this.user!, this.admin!).subscribe((response) => {
+      console.log('Update response:', response);
+      alert('User updated successfully.');
+      this.searchUserOffEmail();
+    },
+    (error) => {
+      alert('Error updating user. Please try again later.');
+      console.error('Error updating user:', error);
+    });
+  }
+  cancelUser(): void {
+    this.user = undefined;
+    this.copyOfUser = undefined;
+    this.userEditHistory = [];
+    this.userSearchString = '';
+    this.showSuggestionsUsers = false;
+  
+  }
+  resetUser(): void {
+    this.user = JSON.parse(JSON.stringify(this.copyOfUser));
+  }
 
   cancelMovie(): void {
     this.hasSearched = false;
+    this.isCreatingMovie = false;
     this.unselectMovie();
   }
 
@@ -610,5 +694,44 @@ export class AdminPageComponent implements OnInit {
       });
     }
   }
+
+  toggleState(): void {
+    this.isCreatingMovie = !this.isCreatingMovie;
+  }
+
+ 
+createMovie(): void {
+  // Validate required fields
+  if (!this.newMovieTitle.trim() || this.newMovieYear <= 0 ) {
+    alert('Please fill in all required fields.');
+    return;
+  }
+
+  // Construct the movie object to send to the API
+  const newMovie = {
+    title: this.newMovieTitle.trim(),
+    year: this.newMovieYear,
+    durationMins: this.newMovieDuration,
+    description: this.newMovieDescription.trim(),
+    image: this.newMovieImage.trim(),
+    actors: this.actorsArray.join(','), // Comma-separated actors
+    directors: this.directorsArray.join(','), // Comma-separated directors
+    streamingServices: this.streamingServicesArray.join(','), // Comma-separated streaming services
+    genres: this.genresArray.join(','), // Comma-separated genres
+    ratingsAndScores: this.ratingsArray.map(r => `${r.company}:${r.score}`).join(','), // Comma-separated ratings
+    productionCompanies: this.productionCompaniesArray.join(',') // Comma-separated production companies
+  };
+
+  console.log('Creating movie with data:', newMovie);
+
+  // Send the data to the backend API
+  this.adminService.createMovie(newMovie).subscribe((response) => {
+    this.cancelMovie();
+  },
+  (error) => {
+    alert('Error creating movie. Please try again later. ' + error.error.error);
+    console.error('Error creating movie:', error);
+  });
+}
   
 }
