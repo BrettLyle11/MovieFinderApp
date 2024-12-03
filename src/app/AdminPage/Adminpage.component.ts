@@ -77,12 +77,12 @@ export class AdminPageComponent implements OnInit {
   clickApplied: boolean = false;
   showSuggestionsDirectors: boolean = false;
   suggestedDirectors: string[] = [];
-  suggestedProductionCompanies: string[] = []; // Example suggestions
-  newProductionCompany: string = ''; // Input value
+  suggestedProductionCompanies: string[] = []; 
+  newProductionCompany: string = '';
   showSuggestionsProductionCompanies: boolean = false;
 
  
-  streamingPlatforms: string[] = ['Apple TV', 'Netflix', 'BritBox', 'Disney+', 'Crave', 'Curiosity Stream', 'Hotstar','Mubi','Paramount+','Pulto TV', 'Prime Video', 'Tubi', 'Zee5'];
+  streamingPlatforms: string[] = ['Apple TV', 'Netflix', 'BritBox', 'Disney+', 'Crave', 'Curiosity Stream', 'Hotstar','Mubi','Paramount+','Pluto TV', 'Prime Video', 'Tubi', 'Zee5'];
   selectedPlatforms: string[] = [];
 
   genres: string[] = Object.values(Genre); 

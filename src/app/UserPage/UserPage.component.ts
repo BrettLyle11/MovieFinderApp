@@ -57,6 +57,7 @@ export class UserPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.signedInUser =  this.service.getUser();
+    console.log('Signed in user:', this.signedInUser);
     this.loadPlaylists();
     this.genres = Object.values(Genre);
 
