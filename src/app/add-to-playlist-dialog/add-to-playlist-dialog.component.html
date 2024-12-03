@@ -1,0 +1,12 @@
+<h1 mat-dialog-title>Select Playlist</h1>
+<div mat-dialog-content>
+  <mat-selection-list #playlists>
+    <mat-list-option *ngFor="let playlist of data.playlists" [value]="playlist">
+      {{ playlist.name }}
+    </mat-list-option>
+  </mat-selection-list>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-button (click)="onAdd(playlists.selectedOptions.selected)">Add</button>
+</div>

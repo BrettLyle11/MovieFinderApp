@@ -9,13 +9,14 @@
         <button (click)="goToWatchHistory()">Watch History</button>
         <section class="playlists">
             <h2>Your Playlists</h2>
-            <div class="playlist-list">
+            <div class="playlist-list" style="width: fit-content;">
               <!-- Iterate over playlists -->
-              <div class="playlist-item" *ngFor="let playlist of playlists">
-                <h3>{{ playlist.name }}</h3>
+              <div class="playlist-item" *ngFor="let playlist of playlists"  (click)="onPlaylistClick(playlist)">
+                <h3>{{ playlist.playlistName }}</h3>
                 <!-- Display playlist details -->
               </div>
             </div>
+            <button (click)="createPlaylist()">Create Playlist</button>
           </section>
     </div>
     <div style="width:50%">

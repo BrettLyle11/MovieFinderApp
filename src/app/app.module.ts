@@ -14,6 +14,12 @@ import { UserPageComponent } from './UserPage/UserPage.component';
 import { ViewMovieComponent } from './View-Movie/ViewMovie.component';
 import { AdminPageComponent } from './AdminPage/Adminpage.component';
 import { AdminService } from './services/Admin.service';
+import { MatDialogModule } from '@angular/material/dialog';
+import { PlaylistDialogComponent } from './playlist-dialog/playlist-dialog.component';
+import { PlaylistService } from './services/Playlist.service';
+import { AddToPlaylistDialogComponent } from './add-to-playlist-dialog/add-to-playlist-dialog.component';
+import { MatListModule } from '@angular/material/list';
+import { MatButtonModule } from '@angular/material/button';
 
 
 @NgModule({
@@ -24,7 +30,9 @@ import { AdminService } from './services/Admin.service';
     LoginComponent,
     UserPageComponent,
     ViewMovieComponent,
-    AdminPageComponent
+    AdminPageComponent,
+    PlaylistDialogComponent,
+    AddToPlaylistDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -32,9 +40,12 @@ import { AdminService } from './services/Admin.service';
     FormsModule,
     ReactiveFormsModule,
     AppRoutingModule,
-    RouterModule  
+    RouterModule,
+    MatDialogModule,
+    MatListModule,
+    MatButtonModule,
   ],
-  providers: [MovieService,MovieFinderUserService,AdminService],
+  providers: [MovieService,MovieFinderUserService,AdminService, PlaylistService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

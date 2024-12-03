@@ -1,0 +1,11 @@
+<h1 mat-dialog-title>Create Playlist</h1>
+<div mat-dialog-content>
+  <form appearance="fill" class="full-width" [formGroup]="playlistForm">
+      <label>Playlist Name</label>
+      <input matInput formControlName="name" />
+  </form>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-button [disabled]="playlistForm.invalid" (click)="onSubmit()">Create</button>
+</div>

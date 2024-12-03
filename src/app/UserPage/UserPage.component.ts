@@ -7,6 +7,9 @@ import { MovieService } from '../services/movie.service';
 import { MovieFilters } from '../models/MovieFilters';
 import { Genre } from '../services/Genres.service';
 import { Movie } from '../models/Movie';
+import { MatDialog } from '@angular/material/dialog';
+import { PlaylistDialogComponent } from '../playlist-dialog/playlist-dialog.component';
+import { PlaylistService } from '../services/Playlist.service';
 
 @Component({
   selector: 'app-main-page',
@@ -16,7 +19,7 @@ import { Movie } from '../models/Movie';
 export class UserPageComponent implements OnInit {
   playlists: any[] = []; // Replace 'any' with your playlist model
   searchForm: FormGroup;
-  streamingPlatforms: string[] = ['Apple TV', 'Netflix', 'BritBox', 'Disney+', 'Crave', 'Curiosity Stream', 'Hotstar','Mubi','Paramount+','Pulto TV', 'Prime Video', 'Tubi', 'Zee5'];
+  streamingPlatforms: string[] = ['Apple TV', 'Netflix', 'BritBox', 'Disney+', 'Crave', 'Curiosity Stream', 'Hotstar', 'Mubi', 'Paramount+', 'Pulto TV', 'Prime Video', 'Tubi', 'Zee5'];
   selectedPlatforms: string[] = [];
   public signedInUser: any = null;
 
@@ -41,7 +44,7 @@ export class UserPageComponent implements OnInit {
 
   movieList: Movie[] = [];
 
-  constructor(private fb: FormBuilder,private movieService: MovieService, private router: Router, private service: MovieFinderUserService) {
+  constructor(private fb: FormBuilder, private movieService: MovieService, private router: Router, private service: MovieFinderUserService, private dialog: MatDialog, private playlistService: PlaylistService) {
     this.searchForm = this.fb.group({
       title: [''],
       actor: [''],
@@ -62,12 +65,12 @@ export class UserPageComponent implements OnInit {
     this.genres = Object.values(Genre);
 
     this.movieService.getAllRatingCompanies().subscribe((response) => {
-      
+
       for (const ratingCompany of response) {
         this.ratingCompanies.set(ratingCompany.ratingCompanyName, ratingCompany.ratingScale);
       }
       this.ratingKeys = Array.from(this.ratingCompanies.keys());
-      
+
     });
 
     // For actor name changes:
@@ -82,10 +85,10 @@ export class UserPageComponent implements OnInit {
 
 
     this.searchForm.get('director')?.valueChanges
-    .pipe(debounceTime(700), distinctUntilChanged())
-    .subscribe((directorName) => {
-      this.onDirectorNameChanged(directorName);
-    });
+      .pipe(debounceTime(700), distinctUntilChanged())
+      .subscribe((directorName) => {
+        this.onDirectorNameChanged(directorName);
+      });
     this.showResulst = false;
   }
   onDirectorNameChanged(directorName: any) {
@@ -112,9 +115,9 @@ export class UserPageComponent implements OnInit {
 
   onActorNameChanged(actorName: any) {
     this.movieService.searchForActorLikeNames(actorName).subscribe((response) => {
-    console.log('Actor search response:', response);
-    this.suggestedActors = response;
-    this.showSuggestionsActors = true;
+      console.log('Actor search response:', response);
+      this.suggestedActors = response;
+      this.showSuggestionsActors = true;
     });
   }
 
@@ -137,13 +140,35 @@ export class UserPageComponent implements OnInit {
   }
 
   preventClose(event: MouseEvent) {
-    
+
     event.preventDefault();
   }
 
   loadPlaylists() {
-    // Fetch the user's playlists from the server or local storage
- 
+    this.playlistService.getPlaylists(1).subscribe((data: any[]) => {
+      this.playlists = data; // Populate the playlists property with data from the service
+      console.log(this.playlists)
+    });
+  }
+
+  onPlaylistClick(playlist: any) {
+    console.log('Playlist clicked:', playlist);
+  }
+
+  createPlaylist() {
+    const dialogRef = this.dialog.open(PlaylistDialogComponent, {
+      width: '400px',
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        console.log('Playlist Name:', result.name);
+        this.playlistService.createPlaylist(result.name, 1).subscribe(response => {
+          console.log('Playlist created:', response);
+        });
+        this.loadPlaylists();
+      }
+    });
   }
 
   goToWatchHistory() {
@@ -155,7 +180,7 @@ export class UserPageComponent implements OnInit {
   onGenreChange(event: any) {
     const genre = event.target.value;
     const isChecked = event.target.checked;
-  
+
     if (isChecked) {
       // Add the genre to the selectedGenres array
       this.selectedGenres.push(genre);
@@ -166,29 +191,29 @@ export class UserPageComponent implements OnInit {
         this.selectedGenres.splice(index, 1);
       }
     }
-  
+
     // Debugging: Log the selected genres
     console.log('Selected Genres:', this.selectedGenres);
   }
 
   validateRating(range: string) {
- 
-    if(range ==='1-10'){
-    const ratingControl = this.searchForm.get('minimumRating');
-    if (ratingControl && ratingControl.value < 1) {
-      ratingControl.setValue(1);
-    } else if (ratingControl && ratingControl.value > 10) {
-      ratingControl.setValue(10);
+
+    if (range === '1-10') {
+      const ratingControl = this.searchForm.get('minimumRating');
+      if (ratingControl && ratingControl.value < 1) {
+        ratingControl.setValue(1);
+      } else if (ratingControl && ratingControl.value > 10) {
+        ratingControl.setValue(10);
+      }
     }
-  }
-  else if(range === '1-100'){
-    const ratingControl = this.searchForm.get('minimumRating');
-    if (ratingControl && ratingControl.value < 1) {
-      ratingControl.setValue(1);
-    } else if (ratingControl && ratingControl.value > 100) {
-      ratingControl.setValue(100);
+    else if (range === '1-100') {
+      const ratingControl = this.searchForm.get('minimumRating');
+      if (ratingControl && ratingControl.value < 1) {
+        ratingControl.setValue(1);
+      } else if (ratingControl && ratingControl.value > 100) {
+        ratingControl.setValue(100);
+      }
     }
-  }
 
   }
 
@@ -197,7 +222,7 @@ export class UserPageComponent implements OnInit {
       event.preventDefault(); // Prevent default form behavior
       event.stopPropagation(); // Stop the event from bubbling up
     }
-    
+
     let combined = this.searchForm.get('selectedRatingCompany')?.value + ':' + this.searchForm.get('minimumRating')?.value;
     this.selectedRatingCompanies.push(combined);
     console.log('showResulst before:', this.showResulst);
@@ -226,15 +251,15 @@ export class UserPageComponent implements OnInit {
     let commaSeparatedDirectors = this.selectedDirectors.join(',');
     let commaSeparatedPlatforms = this.selectedPlatforms.join(',');
     let newMovie: MovieFilters = {
-      MovieTitle : this.searchForm.get('title')?.value || undefined,
-      ActorNames : commaSeparatedActors || undefined,
-      DirectorNames : commaSeparatedDirectors || undefined,
-      StreamingPlatforms : commaSeparatedPlatforms || undefined,
-      Genres : this.selectedGenres.join(',') || undefined,
-      RatingCompanies : this.selectedRatingCompanies.join(',') || undefined,
-      DurationMins : this.searchForm.get('duration')?.value || undefined,
-      MovieYear : this.searchForm.get('year')?.value || undefined
-    } 
+      MovieTitle: this.searchForm.get('title')?.value || undefined,
+      ActorNames: commaSeparatedActors || undefined,
+      DirectorNames: commaSeparatedDirectors || undefined,
+      StreamingPlatforms: commaSeparatedPlatforms || undefined,
+      Genres: this.selectedGenres.join(',') || undefined,
+      RatingCompanies: this.selectedRatingCompanies.join(',') || undefined,
+      DurationMins: this.searchForm.get('duration')?.value || undefined,
+      MovieYear: this.searchForm.get('year')?.value || undefined
+    }
 
     console.log('New Movie:', newMovie);
     this.movieService.getMoviesOffSearch(newMovie).subscribe((response) => {
@@ -243,9 +268,9 @@ export class UserPageComponent implements OnInit {
       this.showResulst = true;
     });
 
-    
+
   }
-  handleCloseMovie(){
+  handleCloseMovie() {
     this.showResulst = false;
     this.selectedPlatforms = [];
   }

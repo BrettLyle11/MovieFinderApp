@@ -57,6 +57,9 @@
   
     <!-- Navigation Buttons -->
     <div class="navigation-buttons">
+      <button (click)="AddMovieToPlaylist()">
+        Add Movie to Playlist
+      </button>
       <button (click)="previousMovie()" [disabled]="currentIndex === 0">
         Previous
       </button>
