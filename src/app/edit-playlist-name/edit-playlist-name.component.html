@@ -1,0 +1,11 @@
+<h1 mat-dialog-title>Edit Playlist Name</h1>
+<div mat-dialog-content>
+  <mat-form-field>
+    <label>New Playlist Name</label>
+    <input matInput [(ngModel)]="newPlaylistName">
+  </mat-form-field>
+</div>
+<div mat-dialog-actions>
+  <button mat-button (click)="onCancel()">Cancel</button>
+  <button mat-button color="primary" (click)="onSave()">Save</button>
+</div>

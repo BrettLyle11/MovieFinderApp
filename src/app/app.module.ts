@@ -20,6 +20,9 @@ import { PlaylistService } from './services/Playlist.service';
 import { AddToPlaylistDialogComponent } from './add-to-playlist-dialog/add-to-playlist-dialog.component';
 import { MatListModule } from '@angular/material/list';
 import { MatButtonModule } from '@angular/material/button';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { PlaylistMoviesDialogComponent } from './playlist-movies-dialog/playlist-movies-dialog.component';
+import { EditPlaylistNameDialogComponent } from './edit-playlist-name/edit-playlist-name.component';
 
 
 @NgModule({
@@ -33,6 +36,8 @@ import { MatButtonModule } from '@angular/material/button';
     AdminPageComponent,
     PlaylistDialogComponent,
     AddToPlaylistDialogComponent,
+    PlaylistMoviesDialogComponent,
+    EditPlaylistNameDialogComponent,
   ],
   imports: [
     BrowserModule,
@@ -44,6 +49,7 @@ import { MatButtonModule } from '@angular/material/button';
     MatDialogModule,
     MatListModule,
     MatButtonModule,
+    MatFormFieldModule,
   ],
   providers: [MovieService,MovieFinderUserService,AdminService, PlaylistService],
   bootstrap: [AppComponent]

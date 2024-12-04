@@ -10,6 +10,7 @@ import { Movie } from '../models/Movie';
 import { MatDialog } from '@angular/material/dialog';
 import { PlaylistDialogComponent } from '../playlist-dialog/playlist-dialog.component';
 import { PlaylistService } from '../services/Playlist.service';
+import { PlaylistMoviesDialogComponent } from '../playlist-movies-dialog/playlist-movies-dialog.component';
 
 @Component({
   selector: 'app-main-page',
@@ -153,6 +154,13 @@ export class UserPageComponent implements OnInit {
 
   onPlaylistClick(playlist: any) {
     console.log('Playlist clicked:', playlist);
+    this.playlistService.getPlaylistMovies(1, playlist.playlistName).subscribe((data) => {
+      console.log('Playlist movies:', data);
+      this.dialog.open(PlaylistMoviesDialogComponent, {
+        width: '400px',
+        data: { movies: data }
+      });
+    });
   }
 
   createPlaylist() {

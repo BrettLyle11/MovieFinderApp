@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { CreatePlaylist } from '../models/CreatePlaylist';
 import { AddToPlaylist } from '../models/AddToPlaylist';
 import { UpdatePlaylistTime } from '../models/UpdatePlaylistTime';
+import { PlaylistInfo } from '../models/PlaylistInfo';
 
 @Injectable({
         providedIn: 'root'
@@ -37,6 +38,17 @@ export class PlaylistService {
                 return this.http.post<void>('https://localhost:44302/api/movies/addMovieToPlaylist', addMovieToPlaylist);
         }
 
+        addMovieToPlaylist2(playlistName: string, myear: any, mname: any): Observable<any> {
+                console.log(myear, mname);
+                let addMovieToPlaylist: AddToPlaylist = {
+                        userID: 1,
+                        playlistName: playlistName,
+                        movieYear: myear,
+                        movieName: mname
+                };
+                return this.http.post<void>('https://localhost:44302/api/movies/addMovieToPlaylist', addMovieToPlaylist);
+        }
+
         updatePlaylistWatchTime(playlistName: string, duration: number): Observable<void> {
                 let updatePlaylistTime: UpdatePlaylistTime = {
                         userID: 1,
@@ -44,5 +56,22 @@ export class PlaylistService {
                         duration: duration
                 };
                 return this.http.post<void>('https://localhost:44302/api/movies/updatePlaylistTime', updatePlaylistTime);
+        }
+
+        getPlaylistMovies(userID: number, playlistName: string): Observable<AddToPlaylist[]> {
+                let playlistInfo: PlaylistInfo = {
+                        userID: userID,
+                        playlistName: playlistName
+                };
+                console.log(playlistName)
+                return this.http.get<AddToPlaylist[]>('https://localhost:44302/api/movies/getPlaylistMovies', {
+                        params: { userID: userID.toString(), playlistName: playlistName }
+                });
+        }
+
+        deletePlaylist(userID: number, playlistName: string): Observable<void> {
+                return this.http.delete<void>('https://localhost:44302/api/movies/deletePlaylist', {
+                        params: { userID: userID.toString(), playlistName: playlistName }
+                });
         }
 }
