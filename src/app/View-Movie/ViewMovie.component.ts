@@ -18,7 +18,11 @@ export class ViewMovieComponent implements OnInit {
 
   playlists: any[] = []; // Replace 'any' with your playlist model
 
-  constructor(private dialog: MatDialog, private playlistService: PlaylistService) {} // Inject MatDialog and PlaylistService
+  constructor(private dialog: MatDialog, private playlistService: PlaylistService) {
+    this.playlistService.getPlaylists(1).subscribe((data: any[]) => {
+      this.playlists = data;
+    });
+  } // Inject MatDialog and PlaylistService
 
   ngOnInit(): void {
     if (this.movies.length > 0) {
@@ -50,9 +54,6 @@ export class ViewMovieComponent implements OnInit {
   }
 
   AddMovieToPlaylist(): void {
-    this.playlistService.getPlaylists(1).subscribe((data: any[]) => {
-      this.playlists = data;
-    });
 
     const dialogRef = this.dialog.open(AddToPlaylistDialogComponent, {
       width: '400px',
@@ -64,8 +65,12 @@ export class ViewMovieComponent implements OnInit {
         console.log('Selected Playlists:', result);
         // Add logic to add the movie to the selected playlists
         result.forEach((playlist: any) => {
-          this.playlistService.addMovieToPlaylist(playlist.id, this.currentMovie).subscribe(response => {
+          this.playlistService.addMovieToPlaylist(playlist.playlistName, this.currentMovie).subscribe(response => {
             console.log('Movie added to playlist:', response);
+          });
+          let movieDuration = this.currentMovie?.durationMins || 0;
+          this.playlistService.updatePlaylistWatchTime(playlist.playlistName, movieDuration).subscribe(response => {
+            console.log('Playlist time updated:', response);
           });
         });
       }

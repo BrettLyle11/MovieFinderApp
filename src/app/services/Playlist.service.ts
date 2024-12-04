@@ -2,6 +2,8 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { CreatePlaylist } from '../models/CreatePlaylist';
+import { AddToPlaylist } from '../models/AddToPlaylist';
+import { UpdatePlaylistTime } from '../models/UpdatePlaylistTime';
 
 @Injectable({
         providedIn: 'root'
@@ -16,7 +18,7 @@ export class PlaylistService {
                         name: name,
                         userID: userID
                 };
-                return this.http.post('https://localhost:44302/api/movies/createPlaylist', playlist);
+                return this.http.post<void>('https://localhost:44302/api/movies/createPlaylist', playlist);
         }
 
         getPlaylists(userID: number): Observable<any[]> {
@@ -25,7 +27,22 @@ export class PlaylistService {
                 });
         }
 
-        addMovieToPlaylist(playlistId: number, movie: any): Observable<any> {
-                return this.http.post(`${this.apiUrl}/addMovieToPlaylist`, { playlistId, movie });
-              }
+        addMovieToPlaylist(playlistName: string, movie: any): Observable<any> {
+                let addMovieToPlaylist: AddToPlaylist = {
+                        userID: 1,
+                        playlistName: playlistName,
+                        movieYear: movie.year,
+                        movieName: movie.title
+                };
+                return this.http.post<void>('https://localhost:44302/api/movies/addMovieToPlaylist', addMovieToPlaylist);
+        }
+
+        updatePlaylistWatchTime(playlistName: string, duration: number): Observable<void> {
+                let updatePlaylistTime: UpdatePlaylistTime = {
+                        userID: 1,
+                        playlistName: playlistName,
+                        duration: duration
+                };
+                return this.http.post<void>('https://localhost:44302/api/movies/updatePlaylistTime', updatePlaylistTime);
+        }
 }

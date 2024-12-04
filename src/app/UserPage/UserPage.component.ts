@@ -165,8 +165,8 @@ export class UserPageComponent implements OnInit {
         console.log('Playlist Name:', result.name);
         this.playlistService.createPlaylist(result.name, 1).subscribe(response => {
           console.log('Playlist created:', response);
+          this.loadPlaylists();
         });
-        this.loadPlaylists();
       }
     });
   }
