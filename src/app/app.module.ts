@@ -23,6 +23,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { PlaylistMoviesDialogComponent } from './playlist-movies-dialog/playlist-movies-dialog.component';
 import { EditPlaylistNameDialogComponent } from './edit-playlist-name/edit-playlist-name.component';
+import { ViewPlaylistMovieComponent } from './view-playlist-movie/view-playlist-movie.component';
 
 
 @NgModule({
@@ -38,6 +39,7 @@ import { EditPlaylistNameDialogComponent } from './edit-playlist-name/edit-playl
     AddToPlaylistDialogComponent,
     PlaylistMoviesDialogComponent,
     EditPlaylistNameDialogComponent,
+    ViewPlaylistMovieComponent,
   ],
   imports: [
     BrowserModule,

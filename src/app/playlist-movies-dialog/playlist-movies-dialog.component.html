@@ -1,17 +1,17 @@
 <h1 mat-dialog-title>Playlist: {{ playlistName }}</h1>
 <div mat-dialog-content>
-  <mat-list>
-    <mat-list-item *ngFor="let movie of data.movies">
-      {{ movie.name }} ({{ movie.year }})
-    </mat-list-item>
-  </mat-list>
+        <mat-list>
+                <mat-list-item *ngFor="let movie of data.movies">
+                        {{ movie.title }} ({{ movie.year }})
+                </mat-list-item>
+        </mat-list>
 </div>
 <div mat-dialog-actions>
         <div style="flex: 1;">
-          <button mat-button (click)="onClose()">Close</button>
+                <button mat-button (click)="onClose()">Close</button>
         </div>
         <div>
-          <button mat-button color="primary" (click)="onEditMovies()">Edit Movies</button>
-          <button mat-button color="primary" (click)="onEditName()">Edit Playlist Name</button>
+                <button mat-button color="primary" (click)="onEditMovies()">Edit Movies</button>
+                <button mat-button color="primary" (click)="onEditName()">Edit Playlist Name</button>
         </div>
-      </div>
+</div>

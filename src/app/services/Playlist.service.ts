@@ -69,9 +69,34 @@ export class PlaylistService {
                 });
         }
 
+        getPlaylistMoviesWithDetails(userID: number, playlistName: string): Observable<any[]> {
+                console.log(playlistName)
+                return this.http.get<AddToPlaylist[]>('https://localhost:44302/api/movies/getMoviesInPlaylist', {
+                        params: { userID: userID.toString(), playlistName: playlistName }
+                });
+        }
+
         deletePlaylist(userID: number, playlistName: string): Observable<void> {
                 return this.http.delete<void>('https://localhost:44302/api/movies/deletePlaylist', {
                         params: { userID: userID.toString(), playlistName: playlistName }
                 });
         }
+
+        deletePlaylistMovies(userID: number, playlistName: string): Observable<void> {
+                return this.http.delete<void>('https://localhost:44302/api/movies/deleteAllMoviesFromPlaylist', {
+                        params: { userID: userID.toString(), playlistName: playlistName }
+                });
+        }
+        
+        // New method to remove a movie from a playlist
+  removeMovieFromPlaylist(userID: number, playlistName: string, movieName: string, movieYear: number): Observable<void> {
+        return this.http.delete<void>(`${this.apiUrl}/removeMovieFromPlaylist`, {
+          params: {
+            userID: userID.toString(),
+            playlistName: playlistName,
+            movieName: movieName,
+            movieYear: movieYear.toString()
+          }
+        });
+      }
 }

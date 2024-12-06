@@ -11,6 +11,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { PlaylistDialogComponent } from '../playlist-dialog/playlist-dialog.component';
 import { PlaylistService } from '../services/Playlist.service';
 import { PlaylistMoviesDialogComponent } from '../playlist-movies-dialog/playlist-movies-dialog.component';
+import { SearchMovie } from '../models/SearchMovie';
+import { AdminService } from '../services/Admin.service';
 
 @Component({
   selector: 'app-main-page',
@@ -44,8 +46,10 @@ export class UserPageComponent implements OnInit {
   showResulst = false;
 
   movieList: Movie[] = [];
+  showPlaylistMovies = false;
+  playlistMovies: any[] = [];
 
-  constructor(private fb: FormBuilder, private movieService: MovieService, private router: Router, private service: MovieFinderUserService, private dialog: MatDialog, private playlistService: PlaylistService) {
+  constructor(private fb: FormBuilder, private movieService: MovieService, private router: Router, private service: MovieFinderUserService, private dialog: MatDialog, private playlistService: PlaylistService, private adminService: AdminService) {
     this.searchForm = this.fb.group({
       title: [''],
       actor: [''],
@@ -154,13 +158,36 @@ export class UserPageComponent implements OnInit {
 
   onPlaylistClick(playlist: any) {
     console.log('Playlist clicked:', playlist);
-    this.playlistService.getPlaylistMovies(1, playlist.playlistName).subscribe((data) => {
+    this.playlistMovies = [];
+    this.playlistService.getPlaylistMoviesWithDetails(1, playlist.playlistName).subscribe((data) => {
       console.log('Playlist movies:', data);
-      this.dialog.open(PlaylistMoviesDialogComponent, {
+      data.forEach((movie) => {
+        let currMovie: SearchMovie = {
+          name: movie.title,
+          year: movie.year,
+        };
+        this.adminService.searchMovie(currMovie).subscribe((movieData: any) => {
+          console.log('Movie data:', movieData);
+          this.playlistMovies.push(movieData);
+        });
+      })
+      const dialogRef = this.dialog.open(PlaylistMoviesDialogComponent, {
         width: '400px',
-        data: { movies: data }
+        data: { playlist: playlist, movies: data }
+      });
+      
+      dialogRef.componentInstance.editMoviesEvent.subscribe((movies: any[]) => {
+      this.showPlaylistMovies = true;
+      });
+
+      dialogRef.afterClosed().subscribe(() => {
+        this.loadPlaylists(); // Refresh the list of playlists after the dialog is closed
       });
     });
+  }
+
+  handleClosePlaylistMovie() {
+    this.showPlaylistMovies = false;
   }
 
   createPlaylist() {

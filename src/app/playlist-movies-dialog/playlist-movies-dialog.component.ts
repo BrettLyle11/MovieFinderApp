@@ -1,7 +1,8 @@
-import { Component, Inject } from '@angular/core';
+import { Component, Inject, Output, EventEmitter } from '@angular/core';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
 import { EditPlaylistNameDialogComponent } from '../edit-playlist-name/edit-playlist-name.component';
 import { PlaylistService } from '../services/Playlist.service';
+import { ViewPlaylistMovieComponent } from '../view-playlist-movie/view-playlist-movie.component';
 
 @Component({
   selector: 'app-playlist-movies-dialog',
@@ -9,7 +10,9 @@ import { PlaylistService } from '../services/Playlist.service';
   styleUrls: ['./playlist-movies-dialog.component.css']
 })
 export class PlaylistMoviesDialogComponent {
-  playlistName: string | undefined; 
+  @Output() editMoviesEvent = new EventEmitter<any>();
+  playlistName: string | undefined;
+  movies: any[] = []; // Add a property to store movies
 
   constructor(
     public dialogRef: MatDialogRef<PlaylistMoviesDialogComponent>,
@@ -17,8 +20,11 @@ export class PlaylistMoviesDialogComponent {
     private dialog: MatDialog,
     private playlistService: PlaylistService
   ) {
-    if (data.movies && data.movies.length > 0) {
-      this.playlistName = data.movies[0].playlistName; // Assign the playlist name
+    if (data.playlist) {
+      this.playlistName = data.playlist.playlistName; // Assign the playlist name
+    }
+    if (data.movies) {
+      this.movies = data.movies; // Assign the movies
     }
   }
 
@@ -43,13 +49,26 @@ export class PlaylistMoviesDialogComponent {
           console.log('New playlist created:', response);
 
           // Add each movie from the original playlist to the new playlist
-          this.data.movies.forEach((movie: any) => {
-            this.playlistService.addMovieToPlaylist(newPlaylistName, movie).subscribe(addResponse => {
+          this.movies.forEach((movie: any) => {
+            console.log(movie);
+            this.playlistService.addMovieToPlaylist2(newPlaylistName, movie.year, movie.title).subscribe(addResponse => {
               console.log('Movie added to new playlist:', addResponse);
             });
+
+            // Update the watch time for the new playlist
+          this.playlistService.updatePlaylistWatchTime(newPlaylistName, movie.durationMins).subscribe(updateResponse => {
+            console.log('Watch time updated for new playlist:', updateResponse);
+          });
+          });
+
+          // Delete the movies from the original playlist
+          console.log(this.playlistName!);
+          this.playlistService.deletePlaylistMovies(userID, this.playlistName!).subscribe(deleteResponse => {
+            console.log('Movies deleted from original playlist:', deleteResponse);
           });
 
           // Delete the original playlist
+          console.log(this.playlistName!);
           this.playlistService.deletePlaylist(userID, this.playlistName!).subscribe(deleteResponse => {
             console.log('Original playlist deleted:', deleteResponse);
             // Update the playlist name in the component
@@ -61,7 +80,7 @@ export class PlaylistMoviesDialogComponent {
   }
 
   onEditMovies(): void {
-    // Implement the logic to edit the movies in the playlist
-    console.log('Edit Movies clicked');
+    this.editMoviesEvent.emit(this.movies); // Emit the event with the movies data
+    this.dialogRef.close(); // Close the dialog
   }
 }

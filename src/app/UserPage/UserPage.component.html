@@ -2,7 +2,7 @@
 
 
 
-<div *ngIf = "!showResulst" class="main-container" style="display: flex;">
+<div *ngIf = "!showResulst && !showPlaylistMovies" class="main-container" style="display: flex;">
     <!-- Navigation Bar -->
     <div style="width: 50%">
         <h1>Welcome, {{signedInUser.username}}</h1>
@@ -200,4 +200,8 @@
 
       <app-view-movie [movies] = "movieList" (closeMovieEvent)="handleCloseMovie()"></app-view-movie>
 
+  </div>
+
+  <div *ngIf="showPlaylistMovies">
+    <app-view-playlist-movie [movies]="playlistMovies" (closeMovieEvent)="handleClosePlaylistMovie()"></app-view-playlist-movie>
   </div>
