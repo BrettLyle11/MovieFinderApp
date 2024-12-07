@@ -1,7 +1,7 @@
 <h1 mat-dialog-title>Select Playlist</h1>
 <div mat-dialog-content>
-  <mat-selection-list #playlists>
-    <mat-list-option *ngFor="let playlist of data.playlists" [value]="playlist">
+  <mat-selection-list #playlists (selectionChange)="onSelectionChange($event)">
+    <mat-list-option *ngFor="let playlist of data.playlists; let i = index" [value]="playlist" [selected]="playlistsStatus[i].containsMovie">
       {{ playlist.playlistName }}
     </mat-list-option>
   </mat-selection-list>

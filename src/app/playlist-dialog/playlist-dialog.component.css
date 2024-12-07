@@ -1,4 +1,18 @@
 .full-width {
-        width: 100%;
-      }
-      
+  width: 100%;
+}
+
+.custom-dialog-container .mat-dialog-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.mat-dialog-container {
+  max-width: 80vw;
+  /* Adjust as needed */
+  max-height: 80vh;
+  /* Adjust as needed */
+  overflow: auto;
+}

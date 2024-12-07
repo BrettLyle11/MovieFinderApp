@@ -7,7 +7,7 @@ import { MovieService } from '../services/movie.service';
 import { MovieFilters } from '../models/MovieFilters';
 import { Genre } from '../services/Genres.service';
 import { Movie } from '../models/Movie';
-import { MatDialog } from '@angular/material/dialog';
+import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { PlaylistDialogComponent } from '../playlist-dialog/playlist-dialog.component';
 import { PlaylistService } from '../services/Playlist.service';
 import { PlaylistMoviesDialogComponent } from '../playlist-movies-dialog/playlist-movies-dialog.component';
@@ -48,6 +48,7 @@ export class UserPageComponent implements OnInit {
   movieList: Movie[] = [];
   showPlaylistMovies = false;
   playlistMovies: any[] = [];
+  selectedPlaylistName: string = '';
 
   constructor(private fb: FormBuilder, private movieService: MovieService, private router: Router, private service: MovieFinderUserService, private dialog: MatDialog, private playlistService: PlaylistService, private adminService: AdminService) {
     this.searchForm = this.fb.group({
@@ -64,7 +65,7 @@ export class UserPageComponent implements OnInit {
 
 
   ngOnInit(): void {
-    this.signedInUser =  this.service.getUser();
+    this.signedInUser = this.service.getUser();
     console.log('Signed in user:', this.signedInUser);
     this.loadPlaylists();
     this.genres = Object.values(Genre);
@@ -150,16 +151,22 @@ export class UserPageComponent implements OnInit {
   }
 
   loadPlaylists() {
-    this.playlistService.getPlaylists(1).subscribe((data: any[]) => {
-      this.playlists = data; // Populate the playlists property with data from the service
-      console.log(this.playlists)
-    });
+    this.playlistService.getPlaylists(this.signedInUser.id).subscribe(
+      (data: any[]) => {
+        this.playlists = data; // Populate the playlists property with data from the service
+        console.log(this.playlists);
+      },
+      (error) => {
+        console.error('Error loading playlists:', error);
+        this.playlists = []; // Set playlists to be empty in case of an error
+      }
+    );
   }
 
   onPlaylistClick(playlist: any) {
     console.log('Playlist clicked:', playlist);
     this.playlistMovies = [];
-    this.playlistService.getPlaylistMoviesWithDetails(1, playlist.playlistName).subscribe((data) => {
+    this.playlistService.getPlaylistMoviesWithDetails(this.signedInUser.id, playlist.playlistName).subscribe((data) => {
       console.log('Playlist movies:', data);
       data.forEach((movie) => {
         let currMovie: SearchMovie = {
@@ -172,15 +179,17 @@ export class UserPageComponent implements OnInit {
         });
       })
       const dialogRef = this.dialog.open(PlaylistMoviesDialogComponent, {
-        width: '400px',
+        width: '500px',
         data: { playlist: playlist, movies: data }
       });
-      
-      dialogRef.componentInstance.editMoviesEvent.subscribe((movies: any[]) => {
-      this.showPlaylistMovies = true;
+
+      dialogRef.componentInstance.editMoviesEvent.subscribe((eventData: { movies: any[], playlistName: string }) => {
+        this.selectedPlaylistName = eventData.playlistName;
+        this.showPlaylistMovies = true;
       });
 
       dialogRef.afterClosed().subscribe(() => {
+        console.log('loaded')
         this.loadPlaylists(); // Refresh the list of playlists after the dialog is closed
       });
     });
@@ -191,14 +200,20 @@ export class UserPageComponent implements OnInit {
   }
 
   createPlaylist() {
-    const dialogRef = this.dialog.open(PlaylistDialogComponent, {
-      width: '400px',
-    });
+    const dialogConfig = new MatDialogConfig();
+    dialogConfig.width = '500px'; // Set the width of the dialog
+    dialogConfig.panelClass = 'custom-dialog-container'; // Add a custom class for additional styling
+
+    const dialogRef = this.dialog.open(PlaylistDialogComponent, dialogConfig);
+    // const dialogRef = this.dialog.open(PlaylistDialogComponent, {
+    //   width: '400px',
+    //   position: { top: '50%', left: '50%' },
+    // });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
         console.log('Playlist Name:', result.name);
-        this.playlistService.createPlaylist(result.name, 1).subscribe(response => {
+        this.playlistService.createPlaylist(result.name, this.signedInUser.id).subscribe(response => {
           console.log('Playlist created:', response);
           this.loadPlaylists();
         });

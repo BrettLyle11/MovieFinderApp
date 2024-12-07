@@ -2,7 +2,7 @@ import { Component, OnInit, Input, Output, EventEmitter } from '@angular/core';
 import { Movie } from '../models/Movie';
 import { MatDialog } from '@angular/material/dialog';
 import { PlaylistService } from '../services/Playlist.service';
-import { AddToPlaylistDialogComponent } from '../add-to-playlist-dialog/add-to-playlist-dialog.component';
+import { MovieFinderUserService } from '../services/MovieFinderUser.service';
 
 @Component({
   selector: 'app-view-playlist-movie',
@@ -11,17 +11,16 @@ import { AddToPlaylistDialogComponent } from '../add-to-playlist-dialog/add-to-p
 })
 export class ViewPlaylistMovieComponent implements OnInit {
   @Input() movies: Movie[] = []; // List of movies passed to the component
+  @Input() playlistName: string = '';
   @Output() closeMovieEvent = new EventEmitter<void>();
   currentIndex: number = 0;
   currentMovie: Movie | null = null;
-  playlists: any[] = []; // Replace 'any' with your playlist model
+  public signedInUser: any = null;
 
-  constructor(private dialog: MatDialog, private playlistService: PlaylistService) {
-    this.playlistService.getPlaylists(1).subscribe((data: any[]) => {
-      this.playlists = data;
-      console.log(this.playlists);
-      console.log(this.playlists[0].playlistName);
-    });
+  constructor(private dialog: MatDialog, private playlistService: PlaylistService, private service: MovieFinderUserService) {
+      console.log(this.movies);
+      console.log(this.playlistName);
+      this.signedInUser =  this.service.getUser();
   }
 
   ngOnInit(): void {
@@ -58,9 +57,13 @@ export class ViewPlaylistMovieComponent implements OnInit {
   RemoveMovieFromPlaylist(): void {
     let movieTitle = this.currentMovie?.title;
     let movieYear = this.currentMovie?.year;
-    console.log(this.playlists);
-    // this.playlistService.removeMovieFromPlaylist(1, , movieTitle, movieYear).subscribe(response => {
-    //   console.log('Movie removed from playlist:', response);
-    // });
+    if (movieTitle && movieYear) {
+      this.playlistService.removeMovieFromPlaylist(this.signedInUser.id, this.playlistName, movieTitle, movieYear).subscribe(response => {
+      });
+      console.log('close movie pls')
+      this.closeMovie();
+    } else {
+      console.error('Movie title or year is undefined.');
+    }
   }
 }

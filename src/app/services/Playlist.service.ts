@@ -5,14 +5,18 @@ import { CreatePlaylist } from '../models/CreatePlaylist';
 import { AddToPlaylist } from '../models/AddToPlaylist';
 import { UpdatePlaylistTime } from '../models/UpdatePlaylistTime';
 import { PlaylistInfo } from '../models/PlaylistInfo';
+import { MovieFinderUserService } from './MovieFinderUser.service';
 
 @Injectable({
         providedIn: 'root'
 })
 export class PlaylistService {
         private apiUrl = `https://localhost:44302/api/movies`;
+        public signedInUser: any = null;
 
-        constructor(private http: HttpClient) { }
+        constructor(private http: HttpClient, private service: MovieFinderUserService) { 
+                this.signedInUser =  this.service.getUser();
+        }
 
         createPlaylist(name: string, userID: number): Observable<any> {
                 let playlist: CreatePlaylist = {
@@ -30,7 +34,7 @@ export class PlaylistService {
 
         addMovieToPlaylist(playlistName: string, movie: any): Observable<any> {
                 let addMovieToPlaylist: AddToPlaylist = {
-                        userID: 1,
+                        userID: this.signedInUser.id,
                         playlistName: playlistName,
                         movieYear: movie.year,
                         movieName: movie.title
@@ -41,7 +45,7 @@ export class PlaylistService {
         addMovieToPlaylist2(playlistName: string, myear: any, mname: any): Observable<any> {
                 console.log(myear, mname);
                 let addMovieToPlaylist: AddToPlaylist = {
-                        userID: 1,
+                        userID: this.signedInUser.id,
                         playlistName: playlistName,
                         movieYear: myear,
                         movieName: mname
@@ -51,7 +55,7 @@ export class PlaylistService {
 
         updatePlaylistWatchTime(playlistName: string, duration: number): Observable<void> {
                 let updatePlaylistTime: UpdatePlaylistTime = {
-                        userID: 1,
+                        userID: this.signedInUser.id,
                         playlistName: playlistName,
                         duration: duration
                 };
@@ -59,10 +63,6 @@ export class PlaylistService {
         }
 
         getPlaylistMovies(userID: number, playlistName: string): Observable<AddToPlaylist[]> {
-                let playlistInfo: PlaylistInfo = {
-                        userID: userID,
-                        playlistName: playlistName
-                };
                 console.log(playlistName)
                 return this.http.get<AddToPlaylist[]>('https://localhost:44302/api/movies/getPlaylistMovies', {
                         params: { userID: userID.toString(), playlistName: playlistName }

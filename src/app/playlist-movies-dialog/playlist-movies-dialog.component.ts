@@ -3,6 +3,7 @@ import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material/dial
 import { EditPlaylistNameDialogComponent } from '../edit-playlist-name/edit-playlist-name.component';
 import { PlaylistService } from '../services/Playlist.service';
 import { ViewPlaylistMovieComponent } from '../view-playlist-movie/view-playlist-movie.component';
+import { MovieFinderUserService } from '../services/MovieFinderUser.service';
 
 @Component({
   selector: 'app-playlist-movies-dialog',
@@ -10,15 +11,18 @@ import { ViewPlaylistMovieComponent } from '../view-playlist-movie/view-playlist
   styleUrls: ['./playlist-movies-dialog.component.css']
 })
 export class PlaylistMoviesDialogComponent {
-  @Output() editMoviesEvent = new EventEmitter<any>();
+  // @Output() editMoviesEvent = new EventEmitter<any>();
+  @Output() editMoviesEvent = new EventEmitter<{ movies: any[], playlistName: string }>();
   playlistName: string | undefined;
   movies: any[] = []; // Add a property to store movies
+  public signedInUser: any = null;
 
   constructor(
     public dialogRef: MatDialogRef<PlaylistMoviesDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
     private dialog: MatDialog,
-    private playlistService: PlaylistService
+    private playlistService: PlaylistService,
+    private service: MovieFinderUserService
   ) {
     if (data.playlist) {
       this.playlistName = data.playlist.playlistName; // Assign the playlist name
@@ -26,6 +30,7 @@ export class PlaylistMoviesDialogComponent {
     if (data.movies) {
       this.movies = data.movies; // Assign the movies
     }
+    this.signedInUser =  this.service.getUser();
   }
 
   onClose(): void {
@@ -42,7 +47,7 @@ export class PlaylistMoviesDialogComponent {
       if (result) {
         console.log('New Playlist Name:', result);
         const newPlaylistName = result;
-        const userID = 1; // Replace with the actual user ID
+        const userID = this.signedInUser.id;
 
         // Create the new playlist
         this.playlistService.createPlaylist(newPlaylistName, userID).subscribe(response => {
@@ -56,9 +61,9 @@ export class PlaylistMoviesDialogComponent {
             });
 
             // Update the watch time for the new playlist
-          this.playlistService.updatePlaylistWatchTime(newPlaylistName, movie.durationMins).subscribe(updateResponse => {
-            console.log('Watch time updated for new playlist:', updateResponse);
-          });
+            this.playlistService.updatePlaylistWatchTime(newPlaylistName, movie.durationMins).subscribe(updateResponse => {
+              console.log('Watch time updated for new playlist:', updateResponse);
+            });
           });
 
           // Delete the movies from the original playlist
@@ -76,11 +81,40 @@ export class PlaylistMoviesDialogComponent {
           });
         });
       }
+      console.log('here')
+      this.onClose();
     });
   }
 
   onEditMovies(): void {
-    this.editMoviesEvent.emit(this.movies); // Emit the event with the movies data
+    console.log(this.playlistName)
+    if (this.playlistName) {
+      this.editMoviesEvent.emit({ movies: this.data.movies, playlistName: this.playlistName }); // Emit the event with the movies data
+    }
     this.dialogRef.close(); // Close the dialog
+  }
+
+  onDeletePlaylist(): void {
+    if (this.playlistName) {
+      this.playlistService.deletePlaylistMovies(this.signedInUser.id, this.playlistName).subscribe(
+        (response) => {
+          console.log('Movies deleted from playlist:', response);
+          // Call deletePlaylist after successfully deleting the movies
+        }
+      );
+      this.deletePlaylist();
+    }
+  }
+
+  deletePlaylist(): void {
+    if (this.playlistName) {
+      this.playlistService.deletePlaylist(this.signedInUser.id, this.playlistName).subscribe(
+        (deleteResponse) => {
+          console.log('Playlist deleted:', deleteResponse);
+          // Additional logic after successful deletion, if needed
+        }
+      );
+    }
+    this.onClose();
   }
 }

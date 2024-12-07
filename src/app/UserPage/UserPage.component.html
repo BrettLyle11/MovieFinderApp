@@ -203,5 +203,5 @@
   </div>
 
   <div *ngIf="showPlaylistMovies">
-    <app-view-playlist-movie [movies]="playlistMovies" (closeMovieEvent)="handleClosePlaylistMovie()"></app-view-playlist-movie>
+    <app-view-playlist-movie [movies]="playlistMovies" [playlistName]="selectedPlaylistName" (closeMovieEvent)="handleClosePlaylistMovie()"></app-view-playlist-movie>
   </div>

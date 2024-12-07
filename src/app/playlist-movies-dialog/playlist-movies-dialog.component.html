@@ -1,17 +1,21 @@
 <h1 mat-dialog-title>Playlist: {{ playlistName }}</h1>
 <div mat-dialog-content>
-        <mat-list>
-                <mat-list-item *ngFor="let movie of data.movies">
-                        {{ movie.title }} ({{ movie.year }})
-                </mat-list-item>
-        </mat-list>
+    <mat-list *ngIf="data.movies.length > 0; else noMovies">
+        <mat-list-item *ngFor="let movie of data.movies">
+            {{ movie.title }} ({{ movie.year }})
+        </mat-list-item>
+    </mat-list>
+    <ng-template #noMovies>
+        <p>No Movies here yet!</p>
+    </ng-template>
 </div>
 <div mat-dialog-actions>
-        <div style="flex: 1;">
-                <button mat-button (click)="onClose()">Close</button>
-        </div>
-        <div>
-                <button mat-button color="primary" (click)="onEditMovies()">Edit Movies</button>
-                <button mat-button color="primary" (click)="onEditName()">Edit Playlist Name</button>
-        </div>
+    <div style="flex: 1;">
+        <button mat-button (click)="onClose()">Close</button>
+    </div>
+    <div>
+        <button mat-button color="primary" (click)="onDeletePlaylist()">Delete Playlist</button>
+        <button mat-button color="primary" (click)="onEditMovies()">Edit Movies</button>
+        <button mat-button color="primary" (click)="onEditName()">Edit Playlist Name</button>
+    </div>
 </div>
