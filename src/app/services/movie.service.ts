@@ -2,12 +2,15 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { MovieFilters } from '../models/MovieFilters';
 import { Observable } from 'rxjs';
+import { MovieFinderUserService } from './MovieFinderUser.service';
 
 @Injectable({
   providedIn: 'root'
 })
 export class MovieService {
-  constructor(private http:HttpClient) {
+  public signedInUser: any = null;
+  constructor(private http:HttpClient, private service: MovieFinderUserService) {
+    this.signedInUser =  this.service.getUser();
    }
 
    searchForDirectorLikeNames(directorName : string): Observable<any> {
@@ -20,9 +23,17 @@ export class MovieService {
     return this.http.post(`https://localhost:44302/api/movies/searchActor/`+actorName,null);
    }
   
-  getMoviesOffSearch(filters: MovieFilters): Observable<any> {
+  // Just in case, I kept the old function
+  // getMoviesOffSearch(filters: MovieFilters): Observable<any> {
     
-    return this.http.post('https://localhost:44302/api/movies/moviesByFilters', filters);
+  //   return this.http.post('https://localhost:44302/api/movies/moviesByFilters', filters);
+  // }
+
+  getMoviesOffSearch(filters: MovieFilters): Observable<any> {
+    const url = `https://localhost:44302/api/movies/moviesByFilters`;
+    const params = new HttpParams().set('userId', this.signedInUser.id.toString());
+
+    return this.http.post<any>(url, filters, { params });
   }
 
   getAllRatingCompanies(): Observable<any> {
