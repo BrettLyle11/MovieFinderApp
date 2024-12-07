@@ -4,6 +4,7 @@ import { AddToPlaylistDialogComponent } from '../add-to-playlist-dialog/add-to-p
 import { MatDialog, MatDialogConfig } from '@angular/material/dialog';
 import { PlaylistService } from '../services/Playlist.service';
 import { MovieFinderUserService } from '../services/MovieFinderUser.service';
+import { WatchHistoryService } from '../services/WatchHistory.service';
 
 @Component({
   selector: 'app-view-movie',
@@ -19,13 +20,24 @@ export class ViewMovieComponent implements OnInit {
   public signedInUser: any = null;
 
   playlists: any[] = []; // Replace 'any' with your playlist model
+  isWatchMovieClicked: boolean = false; // Flag to track if the "Watch Movie" button is clicked
 
-  constructor(private dialog: MatDialog, private playlistService: PlaylistService, private service: MovieFinderUserService) {
-    this.signedInUser =  this.service.getUser();
+  constructor(private dialog: MatDialog, private playlistService: PlaylistService, private service: MovieFinderUserService, private watchHistoryService: WatchHistoryService) {
+    this.signedInUser = this.service.getUser();
     this.playlistService.getPlaylists(this.signedInUser.id).subscribe((data: any[]) => {
       this.playlists = data;
     });
-  } // Inject MatDialog and PlaylistService
+
+    // Fetch the watch history and check if the current movie is in the watch history
+    this.watchHistoryService.getWatchHistory(this.signedInUser.id).subscribe((watchHistory: any[]) => {
+      console.log(watchHistory)
+      if (this.currentMovie) {
+        this.isWatchMovieClicked = watchHistory.some(
+          (movie) => movie.name === this.currentMovie?.title && movie.year === this.currentMovie?.year
+        );
+      }
+    });
+  }
 
   ngOnInit(): void {
     if (this.movies.length > 0) {
@@ -39,13 +51,14 @@ export class ViewMovieComponent implements OnInit {
     if (this.currentIndex < this.movies.length - 1) {
       this.currentIndex++;
       this.currentMovie = this.movies[this.currentIndex];
+      this.isWatchMovieClicked = false; // Reset the flag when navigating to the next movie
     }
   }
   parseList(data: string): string[] {
     return data.split(',').map(item => item.trim());
   }
 
-  closeMovie(){
+  closeMovie() {
     this.closeMovieEvent.emit();
   }
 
@@ -53,6 +66,7 @@ export class ViewMovieComponent implements OnInit {
     if (this.currentIndex > 0) {
       this.currentIndex--;
       this.currentMovie = this.movies[this.currentIndex];
+      this.isWatchMovieClicked = false; // Reset the flag when navigating to the next movie
     }
   }
 
@@ -79,6 +93,13 @@ export class ViewMovieComponent implements OnInit {
           });
         });
       }
+    });
+  }
+
+  AddMovieToWatchHistory(): void {
+    this.watchHistoryService.addMovieToWatchHistory(this.currentMovie, false).subscribe(response => {
+      console.log('Movie Added to History');
+      this.isWatchMovieClicked = true;
     });
   }
 }

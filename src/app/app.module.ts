@@ -24,6 +24,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { PlaylistMoviesDialogComponent } from './playlist-movies-dialog/playlist-movies-dialog.component';
 import { EditPlaylistNameDialogComponent } from './edit-playlist-name/edit-playlist-name.component';
 import { ViewPlaylistMovieComponent } from './view-playlist-movie/view-playlist-movie.component';
+import { ViewWatchHistoryMovieComponent } from './view-watch-history-movie/view-watch-history-movie.component';
 
 
 @NgModule({
@@ -40,6 +41,7 @@ import { ViewPlaylistMovieComponent } from './view-playlist-movie/view-playlist-
     PlaylistMoviesDialogComponent,
     EditPlaylistNameDialogComponent,
     ViewPlaylistMovieComponent,
+    ViewWatchHistoryMovieComponent,
   ],
   imports: [
     BrowserModule,

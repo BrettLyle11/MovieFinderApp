@@ -2,7 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup } from '@angular/forms';
 import { Router } from '@angular/router';
 import { MovieFinderUserService } from '../services/MovieFinderUser.service';
-import { debounceTime, distinctUntilChanged } from 'rxjs';
+import { debounceTime, distinctUntilChanged, forkJoin } from 'rxjs';
 import { MovieService } from '../services/movie.service';
 import { MovieFilters } from '../models/MovieFilters';
 import { Genre } from '../services/Genres.service';
@@ -13,6 +13,7 @@ import { PlaylistService } from '../services/Playlist.service';
 import { PlaylistMoviesDialogComponent } from '../playlist-movies-dialog/playlist-movies-dialog.component';
 import { SearchMovie } from '../models/SearchMovie';
 import { AdminService } from '../services/Admin.service';
+import { WatchHistoryService } from '../services/WatchHistory.service';
 
 @Component({
   selector: 'app-main-page',
@@ -49,8 +50,10 @@ export class UserPageComponent implements OnInit {
   showPlaylistMovies = false;
   playlistMovies: any[] = [];
   selectedPlaylistName: string = '';
+  showWatchHistoryMovies = false;
+  watchHistoryMovies: any[] = [];
 
-  constructor(private fb: FormBuilder, private movieService: MovieService, private router: Router, private service: MovieFinderUserService, private dialog: MatDialog, private playlistService: PlaylistService, private adminService: AdminService) {
+  constructor(private fb: FormBuilder, private movieService: MovieService, private router: Router, private service: MovieFinderUserService, private dialog: MatDialog, private playlistService: PlaylistService, private adminService: AdminService, private watchHistoryService: WatchHistoryService) {
     this.searchForm = this.fb.group({
       title: [''],
       actor: [''],
@@ -199,16 +202,16 @@ export class UserPageComponent implements OnInit {
     this.showPlaylistMovies = false;
   }
 
+  handleCloseWatchHistoryMovie() {
+    this.showWatchHistoryMovies = false;
+  }
+
   createPlaylist() {
     const dialogConfig = new MatDialogConfig();
     dialogConfig.width = '500px'; // Set the width of the dialog
     dialogConfig.panelClass = 'custom-dialog-container'; // Add a custom class for additional styling
 
     const dialogRef = this.dialog.open(PlaylistDialogComponent, dialogConfig);
-    // const dialogRef = this.dialog.open(PlaylistDialogComponent, {
-    //   width: '400px',
-    //   position: { top: '50%', left: '50%' },
-    // });
 
     dialogRef.afterClosed().subscribe((result) => {
       if (result) {
@@ -222,8 +225,28 @@ export class UserPageComponent implements OnInit {
   }
 
   goToWatchHistory() {
-    // Navigate to the watch history page
-    this.router.navigate(['/watch-history']);
+    // Clear the current watch history movies
+    this.watchHistoryMovies = [];
+  
+    // Fetch the watch history from the service
+    this.watchHistoryService.getWatchHistory(this.signedInUser.id).subscribe((data) => {
+      const movieRequests = data.map((movie) => {
+        let currMovie: SearchMovie = {
+          name: movie.name,
+          year: movie.year,
+        };
+        return this.adminService.searchMovie(currMovie);
+      });
+  
+      // Wait for all movie search requests to complete
+      forkJoin(movieRequests).subscribe((movieDataArray: any[]) => {
+        this.watchHistoryMovies = movieDataArray;
+        console.log('Watch history movies:', this.watchHistoryMovies);
+  
+        // Set showWatchHistoryMovies to true after the watch history movies are populated
+        this.showWatchHistoryMovies = true;
+      });
+    });
   }
 
 

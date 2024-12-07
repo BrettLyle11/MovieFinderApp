@@ -1,0 +1,74 @@
+<div class="movie-container" *ngIf="currentMovie; else noMovies">
+        <div class="movie-image">
+          <img [src]="currentMovie.image" [alt]="currentMovie.title" />
+        </div>
+        <div class="movie-details">
+          <h1>{{ currentMovie.title }} ({{ currentMovie.year }})</h1>
+          <p><strong>Duration:</strong> {{ currentMovie.durationMins }} mins</p>
+          <p><strong>Rating:</strong> {{ currentMovie.ratingsAndScores }}</p>
+          <p><strong>Description:</strong> {{ currentMovie.description }}</p>
+          <div class="movie-stats">
+            <div class="stat">
+              <h3>Actors</h3>
+              <ul>
+                <li *ngFor="let actor of parseList(currentMovie.actors)">
+                  {{ actor }}
+                </li>
+              </ul>
+            </div>
+            <div class="stat">
+              <h3>Directors</h3>
+              <ul>
+                <li *ngFor="let director of parseList(currentMovie.directors)">
+                  {{ director }}
+                </li>
+              </ul>
+            </div>
+            <div class="stat">
+              <h3>Genres</h3>
+              <ul>
+                <li *ngFor="let genre of parseList(currentMovie.genres)">
+                  {{ genre }}
+                </li>
+              </ul>
+            </div>
+            <div class="stat">
+              <h3>Streaming Platforms</h3>
+              <ul>
+                <li *ngFor="let platform of parseList(currentMovie.streamingServices)">
+                  {{ platform }}
+                </li>
+              </ul>
+            </div>
+            <div class="stat" *ngIf="currentMovie.productionCompanies">
+              <h3>Production Companies</h3>
+              <ul>
+                <li *ngFor="let company of parseList(currentMovie.productionCompanies)">
+                  {{ company }}
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+        <div class="navigation-buttons">
+          <button (click)="RemoveMovieFromWatchHistory()">
+            Remove Movie from Watch History
+          </button>
+          <button (click)="previousMovie()" [disabled]="currentIndex === 0">
+            Previous
+          </button>
+          <button
+            (click)="nextMovie()"
+            [disabled]="currentIndex === movies.length - 1"
+          >
+            Next
+          </button>
+          <button (click)="closeMovie()">Back To Search</button>
+        </div>
+      </div>
+      <ng-template #noMovies>
+        <div class="no-movies">
+          <p>No movies to display.</p>
+          <button (click)="closeMovie()">Back To Search</button>
+        </div>
+      </ng-template>

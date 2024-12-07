@@ -14,8 +14,8 @@ export class PlaylistService {
         private apiUrl = `https://localhost:44302/api/movies`;
         public signedInUser: any = null;
 
-        constructor(private http: HttpClient, private service: MovieFinderUserService) { 
-                this.signedInUser =  this.service.getUser();
+        constructor(private http: HttpClient, private service: MovieFinderUserService) {
+                this.signedInUser = this.service.getUser();
         }
 
         createPlaylist(name: string, userID: number): Observable<any> {
@@ -87,16 +87,16 @@ export class PlaylistService {
                         params: { userID: userID.toString(), playlistName: playlistName }
                 });
         }
-        
+
         // New method to remove a movie from a playlist
-  removeMovieFromPlaylist(userID: number, playlistName: string, movieName: string, movieYear: number): Observable<void> {
-        return this.http.delete<void>(`${this.apiUrl}/removeMovieFromPlaylist`, {
-          params: {
-            userID: userID.toString(),
-            playlistName: playlistName,
-            movieName: movieName,
-            movieYear: movieYear.toString()
-          }
-        });
-      }
+        removeMovieFromPlaylist(userID: number, playlistName: string, movieName: string, movieYear: number): Observable<void> {
+                return this.http.delete<void>(`${this.apiUrl}/removeMovieFromPlaylist`, {
+                        params: {
+                                userID: userID.toString(),
+                                playlistName: playlistName,
+                                movieName: movieName,
+                                movieYear: movieYear.toString()
+                        }
+                });
+        }
 }

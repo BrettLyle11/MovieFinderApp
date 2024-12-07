@@ -57,6 +57,9 @@
   
     <!-- Navigation Buttons -->
     <div class="navigation-buttons">
+      <button (click)="AddMovieToWatchHistory()" [disabled]="isWatchMovieClicked">
+        Watch Movie
+      </button>
       <button (click)="AddMovieToPlaylist()">
         Add Movie to Playlist
       </button>
