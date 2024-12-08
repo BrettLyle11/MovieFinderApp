@@ -40,6 +40,7 @@ export class ViewMovieComponent implements OnInit {
   }
 
   ngOnInit(): void {
+    console.log(this.movies);
     if (this.movies.length > 0) {
       this.currentMovie = this.movies[this.currentIndex];
     } else {
