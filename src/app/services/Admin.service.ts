@@ -24,7 +24,7 @@ export class AdminService {
     }
 
     searchMovie(mockMovie: SearchMovie): Observable<any> {
-        return this.http.post(this.apiUrl + '/api/movies/searchMovieTitleAndYear',mockMovie);
+        return this.http.post(this.apiUrl + '/api/movies/XZ',mockMovie);
     }
 
     searchMovieNames(name: String): Observable<any> {
