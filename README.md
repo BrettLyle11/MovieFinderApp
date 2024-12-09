@@ -1,5 +1,10 @@
 # MovieFinderApp
 
+CPSC 471 Group 25 Final Project
+
+Every piece of code for the display is under src/app then see any folders
+
+
 This project was generated with [Angular CLI](https://github.com/angular/angular-cli) version 17.3.11.
 
 ## Development server
