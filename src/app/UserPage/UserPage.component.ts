@@ -72,6 +72,7 @@ export class UserPageComponent implements OnInit {
     console.log('Signed in user:', this.signedInUser);
     this.loadPlaylists();
     this.genres = Object.values(Genre);
+    this.selectedGenres.push(this.signedInUser.favouriteGenre);
 
     this.movieService.getAllRatingCompanies().subscribe((response) => {
 
