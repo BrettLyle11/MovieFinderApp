@@ -231,22 +231,26 @@ export class UserPageComponent implements OnInit {
   
     // Fetch the watch history from the service
     this.watchHistoryService.getWatchHistory(this.signedInUser.id).subscribe((data) => {
-      const movieRequests = data.map((movie) => {
-        let currMovie: SearchMovie = {
-          name: movie.name,
-          year: movie.year,
-        };
-        return this.adminService.searchMovie(currMovie);
-      });
-  
-      // Wait for all movie search requests to complete
-      forkJoin(movieRequests).subscribe((movieDataArray: any[]) => {
-        this.watchHistoryMovies = movieDataArray;
-        console.log('Watch history movies:', this.watchHistoryMovies);
-  
-        // Set showWatchHistoryMovies to true after the watch history movies are populated
+      if (data) {
+        const movieRequests = data.map((movie) => {
+          let currMovie: SearchMovie = {
+            name: movie.name,
+            year: movie.year,
+          };
+          return this.adminService.searchMovie(currMovie);
+        });
+    
+        // Wait for all movie search requests to complete
+        forkJoin(movieRequests).subscribe((movieDataArray: any[]) => {
+          this.watchHistoryMovies = movieDataArray;
+          console.log('Watch history movies:', this.watchHistoryMovies);
+    
+          // Set showWatchHistoryMovies to true after the watch history movies are populated
+          this.showWatchHistoryMovies = true;
+        });
+      } else {
         this.showWatchHistoryMovies = true;
-      });
+      }
     });
   }
 
